@@ -1,0 +1,7 @@
+{
+    "Name": "LibAttract",
+    "Version": "0.96.1",
+    "Major": 0,
+    "Minor": 96,
+    "Patch": 1
+}

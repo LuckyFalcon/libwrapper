@@ -1,0 +1,53 @@
+Release notes
+
+Version 0.97.0 (alpha, WIP)
+----------------------
+- GID as string (65 bytes)
+- Fixed variable width on all platforms (uint_64t/uint_32t)
+- Global settings per instance (tresholds, adjustable precision etc)
+- C++ example dropped
+
+Version 0.96.1 ->THIS<- (alpha, last version before interface change)
+----------------------
+- adjusted precision for entropy economy (160% less load), kudos to Theodore Smith!
+- applied /MT /MTD to all configs not only x32, removed runtime dll dependency
+- fixed overlap issue
+
+Version 0.95.5 (alpha)
+----------------------
+- Project internal structure rehaul 
+- added sample VC projects to distribution
+- added win distribution to production scripts
+- Added getVersion
+- Moved temporary allocation holders deallocation to releaseEngine
+- zScore asymmetry fix
+- Added testHex and c-compatible testcoords
+- fixed initWithHex
+- fixed wrong categorization (void as attractors with negative score)
+- fixed coordinate print
+- added example for each of inits
+
+Version 0.94 (alpha)
+----------------------
+- Added versioning header
+- Added automated makefile for unix builds
+- Added production scripts
+- Added changelog (this!)
+
+Version 0.93.3 (alpha)
+----------------------
+- First working C# interface wrapper over C header for DLL
+- New C init options (by coords)
+- Added rarity interface stub
+- Various bugfixes
+
+Version 0.92 (alpha)
+----------------------
+- Moved from C++ ABI to C ABI
+- Added C header file
+- Thread safety locks
+- Various bugfixes
+
+Version 0.91 (alpha)
+----------------------
+- initial release
