@@ -1,30 +1,26 @@
 'use strict';
-const path = require('path');
-const addon = require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
-const qrng = require(path.join(process.cwd(), "/services/anuapi/anuapi.js"));
-const crypto = require('crypto');
-const { fork } = require('child_process');
 const { check, validationResult } = require('express-validator');
-const numCPUs = require('os').cpus().length;
-const checkAuth = require(path.join(process.cwd(), "/services/authentication/check-auth.js"));
-
-
-let numRunning = 0;
-let maxRunning = 4;
+const path       = require('path');
+const crypto     = require('crypto');
+const addon      = require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
+const qrng       = require(path.join(process.cwd(), "/services/anuapi/anuapi.js"));
+const checkAuth  = require(path.join(process.cwd(), "/services/authentication/check-auth.js"));
+const workerFarm = require('worker-farm')
+    , workers    = workerFarm({maxConcurrentWorkers : 3, maxConcurrentWorkers : 1}, require.resolve(path.join(process.cwd(), "/services/getAttractor/forkedlongComputation.js")))
 
 //Used to get the current version of libAttract
-exports.list_version = function(req, res) {
+exports.list_version = (req, res) => {
 
-    //Call Functions from libAttractFunctions and set variables
-   var VersionMajor = addon.getVersionMajor();
-   var VersionMinor = addon.getVersionMinor();
-   var VersionPatch = addon.getVersionPatch();
+   //Call Functions from libAttractFunctions and set variables
+   let VersionMajor = addon.getVersionMajor();
+   let VersionMinor = addon.getVersionMinor();
+   let VersionPatch = addon.getVersionPatch();
 
    //Set the content type and status code
    res.writeHead(200, {'content-Type': 'application/json'});
 
    //Create object containing the version information
-   var myObj = {
+   let versionObject = {
      Name: 'LibAttract',
      Version: VersionMajor + "." + VersionMinor + "." + VersionPatch,
      Major: VersionMajor,
@@ -33,11 +29,11 @@ exports.list_version = function(req, res) {
    }
 
    //Convert object to JSON and end response. 
-   res.end(JSON.stringify(myObj));
+   res.end(JSON.stringify(versionObject));
 }
 
 //Used to get current pool of entropy
-exports.getPool = function(req, res) {
+exports.getPool = (req, res) => {
   
   //Set the content type and status code
   res.writeHead(200, {'content-Type': 'application/json'});
@@ -45,8 +41,19 @@ exports.getPool = function(req, res) {
   qrng.getpool(function(result) {
       res.end(JSON.stringify(result));
   });
-
 }
+
+//Used to get all pools available
+exports.getpools = (req, res) => {
+  
+  //Set the content type and status code
+  res.writeHead(200, {'content-Type': 'application/json'});
+
+  qrng.getpools(function(result) {
+      res.end(JSON.stringify(result));
+  });
+}
+
 
 //Used to set own entropy
 exports.setentropy = [
@@ -117,6 +124,10 @@ exports.attractors = [
     .isFloat({ min: 0, max: 4 })
     .optional(),
 
+  check('pool')
+    .isBoolean()
+    .optional(),
+
  async function attractors(req, res, next) { /* the rest of the existing function */ 
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
@@ -125,11 +136,9 @@ exports.attractors = [
 
   try {
 
-  ++numRunning;
-
   //We fork our process
-  const forked = fork(path.join(process.cwd(), 'services/getAttractor/forkedlongComputation.js'));
-    
+  //const forked = fork(path.join(process.cwd(), 'services/getAttractor/forkedlongComputation.js'));
+
   //Get GID from the qeury
   var GID = req.query.gid;
     
@@ -145,7 +154,9 @@ exports.attractors = [
 
   if (req.query.filtering) {var filter = parseFloat(req.query.filtering); 
   } else { var filter = 4.0; } //end if
+  if (req.query.pool){var pool = true
 
+  } else {var pool = false;}
   //Create object with parameters to send to fork
   var myObj = {
       'GID': GID,
@@ -153,24 +164,24 @@ exports.attractors = [
       'x': x,
       'y': y,
       'radius': radius,
-      'filter': filter
+      'filter': filter,
+      'pool': pool
   }
 
-  //Send object to fork
-  forked.send(myObj);
+  //Send object to worker
+  workers(myObj, function (err, output) {
+    if (err){
+      res.json({ error: err || err.toString() });
+    }
 
-  //When the fork sends a message we send the result to the client
-  forked.on('message', (sum) => {
-      --numRunning;
-      forked.kill();
-      res.json(sum);
-    
-  });
-
+    //When the worker sends a message we send the result to the client
+    res.json(output);
+  })
+  
   } catch (err) {
-    --numRunning;
+
     console.log('Err');
-    res.json({ error: err.message || err.toString() });
+   
   }
 }
 ];
@@ -419,7 +430,7 @@ exports.sizes = [
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() })
   }
-//Radius is manditory, spotradius is optional
+  //Radius is manditory, spotradius is optional
   
    //For both the Radius and Spotradius
    if(req.query.radius && req.query.spotradius){
@@ -439,7 +450,7 @@ exports.sizes = [
        var hexSize = addon.requiredEnthropyHex(th);
 
        //Create object containing the version information
-       var myObj = {
+       var sizeObject = {
         "Type": 'direct',
         "N": n,
         "spot": spot,
@@ -447,7 +458,7 @@ exports.sizes = [
        }
 
        //Convert object to JSON and end response. 
-       res.end(JSON.stringify(myObj));
+       res.end(JSON.stringify(sizeObject));
 
    //For Radius only
    } else if (req.query.radius) {
@@ -466,7 +477,7 @@ exports.sizes = [
     var hexSize = addon.requiredEnthropyHex(th);
 
     //Create object containing the version information
-    var myObj = {
+    var sizeObject = {
         "Type": 'optimized',
         "N": n,
         "spot": spot,
@@ -474,7 +485,7 @@ exports.sizes = [
     }
 
     //Convert object to JSON and end response. 
-    res.end(JSON.stringify(myObj));
+    res.end(JSON.stringify(sizeObject));
 
    } else {
    //Set the content type and status code
@@ -486,7 +497,7 @@ exports.sizes = [
 ]
 
 //Make attractors
-exports.makeattractor = function(GID, attractors, gid_valid, centervalid, calc_time, callback) {
+exports.makeattractor = function(attractors, gid_valid, centervalid, calc_time, callback) {
   
   //Loop over results and pass it to the Array
   var empDetails = attractors
@@ -496,7 +507,7 @@ exports.makeattractor = function(GID, attractors, gid_valid, centervalid, calc_t
    //Create object containing the version information
   for (i = 0; i < empDetails.length; i++){
   var myObj = {
-     GID: GID,
+     GID: empDetails[i].GID,
      TID: empDetails[i].TID,
      LID: empDetails[i].LID,
      type: empDetails[i].type,

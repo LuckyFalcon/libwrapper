@@ -16,9 +16,8 @@ app.use(function(req, res, next) {
 
 });
 
-var routes = require('./routes/Routes'); //importing route
-routes(app); //register the route
-
+var routes = require('./routes/Routes'); 
+routes(app); 
 
 app.listen(port);
 

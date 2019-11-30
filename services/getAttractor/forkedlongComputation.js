@@ -1,55 +1,50 @@
-const qrng = require("../anuapi/anuapi.js");
-const addon = require('../../build/Release/AttractFunctions');
-const cont = require('../../controllers/Controller');
-var now = require("performance-now")
-const isValidCoordinates = require('is-valid-coordinates');
+const path  = require('path');
+const qrng  = require(path.join(process.cwd(), "/services/anuapi/anuapi.js"));
+const addon = require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
+const cont  = require(path.join(process.cwd(), '/controllers/Controller'));
+const now   = require("performance-now")
 
-const longComputation = (limit, callback) => {
+module.exports = function(limit, callback){
   
-  //Set variables recieved from the main function.
-  var GID = limit.GID;
-  var x = limit.x;
-  var y = limit.y;
-  var radius = limit.radius;
-  var filter = limit.filter;
-  var handle = limit.handle;
+  //Set letiables recieved from the main function.
+  let GID = limit.GID;
+  let x = limit.x;
+  let y = limit.y;
+  let radius = limit.radius;
+  let filter = limit.filter;
+  let handle = limit.handle;
+  let pool = limit.pool;
   
-  //Check coordinates
-  var centervalid = isValidCoordinates(y, x)
-
-
   //Check if GID is found
-  qrng.getentropy(GID, function(result) {
-  	   if (result == "1") {callback("GID invalid");
-       } else if (centervalid == false) {callback("Coordinates are invalid") 
+  qrng.getentropy(GID, pool, function(result) {
+       if (result == "1") {callback(null, "GID invalid");
        } else {
-        
-        var gid_valid = true;
+        let gid_valid = true;
 
         //Set the hex to the result of the entropy
-        var myHexString = result.Entropy;
+        let myHexString = result.Entropy;
 
         //Create a buffer for the hex string
-        var buffer = Buffer.from(myHexString);
+        let buffer = Buffer.from(myHexString);
 
         //Init the instance
-        var instanceWithHex = addon.initWithHex(handle, buffer, buffer.length);
+        let instanceWithHex = addon.initWithHex(handle, buffer, buffer.length);
 
         //Start timer
-        var start = now()
+        let start = now()
 
         addon.CalculateResultsAsync(instanceWithHex, radius, x, y, GID, filter, function(results) {
           //End timer
-          var end = now()
+          let end = now()
 
           //Total time calculation
-          var calc_time = (end).toFixed(2);
+          let calc_time = (end).toFixed(2);
 
           //We create a array from the results of making the attractors. 
-          cont.makeattractor(GID, results, gid_valid, true, calc_time, function(results){
+          cont.makeattractor(results, gid_valid, true, calc_time, function(results){
 
             //Return the results so the message can be send to the main function.   
-            callback(results);
+            callback(null, results);
 
           });
           
@@ -59,13 +54,3 @@ const longComputation = (limit, callback) => {
   }); // End qrng getentropy
   
 }; // End function
-
-process.on('message', async (limit) => {
-  
-  //We call the longComputation function, which will calculate the attractors.
-  //On completion of calculating attractors we send the result to the main function. 
-  longComputation(limit, function(result) {
-  		process.send(result);
-  });
-  
-});

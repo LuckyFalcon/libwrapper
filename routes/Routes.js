@@ -1,35 +1,39 @@
 'use strict';
-const todoList = require('../controllers/Controller');
+const controller = require('../controllers/Controller');
  
 module.exports = function(app) {
  
   //GET route for version
   app.route('/Version')
-  	.get(todoList.list_version);
+  	.get(controller.list_version);
   
   //GET route for sizes
   app.route('/sizes')
-    .get(todoList.sizes);
+    .get(controller.sizes);
 
   //GET for the running the pseudo instance
   app.route('/pseudo')
-    .get(todoList.psuedo);
+    .get(controller.psuedo);
 
   //POST for the setting own entropy
   app.route('/setentropy')
-    .post(todoList.setentropy);
+    .post(controller.setentropy);
 
   //GET for getting entropy
   app.route('/entropy')
-    .get(todoList.entropy);
+    .get(controller.entropy);
 
   //GET for getting pool
   app.route('/pool')
-    .get(todoList.getPool);
+    .get(controller.getPool);
+
+  //GET for getting pools
+  app.route('/getpools')
+    .get(controller.getpools);
 
   //GET for getting attractors
   app.route('/attractors')
-    .get(todoList.attractors);
+    .get(controller.attractors);
 
 };
 
