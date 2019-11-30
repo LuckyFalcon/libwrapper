@@ -41,7 +41,7 @@ module.exports = function(limit, callback){
           let calc_time = (end).toFixed(2);
 
           //We create a array from the results of making the attractors. 
-          cont.makeattractor(results, gid_valid, true, calc_time, function(results){
+          cont.makeattractor(GID, results, gid_valid, true, calc_time, function(results){
 
             //Return the results so the message can be send to the main function.   
             callback(null, results);

@@ -580,8 +580,8 @@ void CalculateResultsAsync(const FunctionCallbackInfo<Value>&args) {
        args[2].As<Number>()->Value();
   double y = 
        args[3].As<Number>()->Value();
-  uint32_t GID = 
-       args[4].As<Number>()->Value();
+  uint32_t GID = 23;
+
   double filter = 
        args[5].As<Number>()->Value();
 

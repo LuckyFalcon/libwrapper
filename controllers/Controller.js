@@ -497,7 +497,7 @@ exports.sizes = [
 ]
 
 //Make attractors
-exports.makeattractor = function(attractors, gid_valid, centervalid, calc_time, callback) {
+exports.makeattractor = function(GID, attractors, gid_valid, centervalid, calc_time, callback) {
   
   //Loop over results and pass it to the Array
   var empDetails = attractors
@@ -507,7 +507,7 @@ exports.makeattractor = function(attractors, gid_valid, centervalid, calc_time, 
    //Create object containing the version information
   for (i = 0; i < empDetails.length; i++){
   var myObj = {
-     GID: empDetails[i].GID,
+     GID: GID,
      TID: empDetails[i].TID,
      LID: empDetails[i].LID,
      type: empDetails[i].type,
