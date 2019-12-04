@@ -283,26 +283,20 @@ exports.getpools = function gettoken(callback){
 
   let counter = 0;
     
-    for(var i = 0; i < files.length; i++) {
-      if(path.extname(files[i]) === ".pool") {
-        counter ++
-        poolFile = files[i].substring(0, 64)
-            fs.stat('./services/entropy/pool/'+files[i], function(err, stats){
-              let obj = {
+    files.forEach(function(file) {
+        var stats = fs.statSync('./services/entropy/pool/'+file);
+        let obj = {
                   "pool": 0,
                   "time": 0
               }
-              var mtime = stats.mtime;
-              obj.pool = (poolFile)
-              obj.time = (mtime)
-              objects.push(obj)
-              if(objects.length == counter){
-                  callback(objects)
-              }
-        });
-      }
- 
-    } //end loop
+
+        obj.pool = file
+        obj.time = stats.mtime;
+        objects.push(obj)
+    });
+
+    callback(objects)
+
 } //End Function
 
 //Used for getting pool entropy with GID
