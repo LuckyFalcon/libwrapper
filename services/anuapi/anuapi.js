@@ -2,7 +2,7 @@
 const https      = require('https')
 const path       = require('path');
 const fs         = require('fs');
-const addon      = require('../../build/Release/AttractFunctions');
+const addon      = require('../../build/Release/AttractFunctions'); 
 const crypto     = require('crypto');
 const size_url   = 520;
 const length_url = 500;
@@ -99,7 +99,7 @@ exports.getsizeqrng  = function(size, callback){
 } //End Function
 
 //Used for calling ANU Quantum Random Numbers Server
-function anu(url, callback){
+function anu(url, length, callback){
 
   https.get(url, function(res){
     var body = '';
@@ -110,15 +110,15 @@ function anu(url, callback){
 
       res.on('end', function(){
 
-          var object_entropy = undefined; 
-          var fbResponse = JSON.parse(body);
-          var tmpstring = fbResponse.data
+        var object_entropy = undefined; 
+        var fbResponse = JSON.parse(body);
+        var tmpstring = fbResponse.data
 
-        for (v = 0; v < length_url; v++){
+        for (v = 0; v < length; v++){
           if(!object_entropy){
               object_entropy = tmpstring[v]
           } else {
-            object_entropy += tmpstring[v]
+              object_entropy += tmpstring[v]
           }         
         }
 
@@ -130,24 +130,25 @@ function anu(url, callback){
   }).on('error', function(e){
       console.log("Got an error: ", e);
   });
+
 } //End Function
 
 //Used for querying ANU for small queries
 function anuSmall(size, length, url, callback){
   var results_anu = undefined; //This is a large array containing the entropy. 
   
-  anu(url, function(result) {
+  anu(url, length, function(result) {
     if(results_anu == undefined){
       results_anu = result; 
     } else { 
       results_anu += result; 
     }
-  
+        
         var entropyObject = createEntropyObject(results_anu, size)
 
         console.log(1 + " amounts of small queries done");
-        console.log("Total entropy: " + entropyObject.Entropy.length);
-        console.log("Added to pool: " + (entropyObject.Entropy.length - size));
+        console.log("Total entropy: " + results_anu.length);
+        console.log("Added to pool: " + (results_anu.length - size));
         console.log("End Entropy Reqeust of size: " + entropyObject.EntropySize)
 
         fs.writeFile ('./services/entropy/'+entropyObject.Gid+".hex", JSON.stringify(entropyObject, null, 2), function(err) {
@@ -163,7 +164,7 @@ function callanuBig(size, url, big_query, callback){
 
   for (i = 0; i < big_query; i++) {
 
-    anu(url, function(result) {
+    anu(url, length_url, function(result) {
       if(results_anu == undefined){
         results_anu = result; 
       } else { 
@@ -175,7 +176,7 @@ function callanuBig(size, url, big_query, callback){
         var entropyObject = createEntropyObject(results_anu, size)
 
         console.log(big_query + " amounts of big queries done");
-        console.log("Total entropy: " + entropyObject.Entropy.length);
+        console.log("Total entropy: " + results_anu.length);
         console.log("Added to pool: " + (entropyObject.Entropy.length - size));
         console.log("End Entropy Reqeust of size: " + entropyObject.EntropySize)
         
@@ -197,7 +198,7 @@ function callanumulti(size, url, big_query, small_query_length, callback){
   var timesRun = 0;
 
   for (i = 0; i < big_query; i++) {
-    anu(url, function(result) {
+    anu(url, length_url, function(result) {
         ++timesRun
         if(results_anu == undefined){
           results_anu = result; 
@@ -207,11 +208,11 @@ function callanumulti(size, url, big_query, small_query_length, callback){
         if(timesRun == big_query){
           var url = "https://qrng.anu.edu.au/API/jsonI.php?type=hex16&size="+size_url+"&length="+small_query_length;
           
-          anu(url, function(result){
+          anu(url, small_query_length, function(result){
               results_anu += result;
 
               var entropyObject = createEntropyObject(results_anu, size)
-  
+
               console.log(big_query + " amounts of big queries done");
               console.log("Small query of " + small_query_length + " length done");
               console.log("Total entropy: " + results_anu.length);
@@ -302,13 +303,15 @@ exports.getpools = function gettoken(callback){
 //Used for getting pool entropy with GID
 exports.getpool = function(callback){
   let timestamp = Date.now(); 
+  let gid = 0;
+  let length_pool = 0;
 
   if(pool == undefined){
     gid = 0;
-    let length_pool = 0;
+    length_pool = 0;
   } else {
-    let gid = crypto.createHash('sha256').update(pool).digest('hex');
-    let length_pool = pool.length;
+    gid = crypto.createHash('sha256').update(pool).digest('hex');
+    length_pool = pool.length;
   }
 
   let poolObject = {
@@ -317,7 +320,7 @@ exports.getpool = function(callback){
       PoolSize: length_pool,
       PoolEntropy: pool
   }
-
+  pool = undefined;
   //Write file to disk by GID
   fs.writeFile ('./services/entropy/pool/'+gid+".pool", JSON.stringify(poolObject, null, 2), function(err) {
     if (err) throw err;
@@ -338,7 +341,7 @@ writePool = function(callback){
       Size: length_pool,
       Entropy: pool
   }
-
+  pool = undefined;
   //Write file to disk by GID
   fs.writeFile ('./services/entropy/pool/'+gid+".pool", JSON.stringify(poolObject, null, 2), function(err) {
     if (err) throw err;
@@ -350,7 +353,6 @@ writePool = function(callback){
 createEntropyObject = function(object_entropy, size){
 
   var gid = crypto.createHash('sha256').update(object_entropy).digest('hex');
-
   var timestamp = Date.now(); 
   var entropy = object_entropy.substring(0,size); 
           
