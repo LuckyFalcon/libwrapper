@@ -21,6 +21,7 @@ The current libWrapper uses the follwing NPM packages:
 * performance-now
 * rebuild
 * soap
+* worker-farm
 
 # Running the API locally
 Once you've cloned and extracted the respotitory, run the followig commands in the extracted folder:
