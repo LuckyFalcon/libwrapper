@@ -74,27 +74,27 @@ exports.setentropy = [
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() })
   }
-  if (req.query.size < 286) {res.writeHead(400, {'content-Type': 'application/json'}); res.end(JSON.stringify("Size Error, size has to be set to 286 Minimum"))}
-  else if (req.query.size > 6000000) {res.writeHead(400, {'content-Type': 'application/json'}); res.end(JSON.stringify("Size Error, size has to be set to 6000000 Maximum"))}
+  if (req.body.size < 286) {res.writeHead(400, {'content-Type': 'application/json'}); res.end(JSON.stringify("Size Error, size has to be set to 286 Minimum"))}
+  else if (req.body.size > 6000000) {res.writeHead(400, {'content-Type': 'application/json'}); res.end(JSON.stringify("Size Error, size has to be set to 6000000 Maximum"))}
   else {
   //Set the content type and status code
   res.writeHead(200, {'content-Type': 'application/json'});
   
   //Set variables to params
-  var size = parseFloat(req.query.size); 
+  var size = parseFloat(req.body.size); 
   var entropy = req.body.entropy;
   var gid = crypto.createHash('sha256').update(req.body.entropy).digest('hex');
 
   //Check if timestamp is specified otherwise generate
-  if(req.query.timestamp){
-    var timestamp = parseFloat(req.query.timestamp);
+  if(req.body.timestamp){
+    var timestamp = parseFloat(req.body.timestamp);
    } else {
     var timestamp = Date.now();  
    } // End if
 
 
   //Check if the entropy is the same as the specified size. 
-  if (entropy.length != req.query.size){
+  if (entropy.length != req.body.size){
       res.end(JSON.stringify("size does not match length of entropy string"));
   } else {
       var hexfromAnu = qrng.saveentropy(entropy, size, gid, timestamp, function(result) {
