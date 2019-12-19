@@ -98,9 +98,6 @@ exports.setentropy = [
       res.end(JSON.stringify("size does not match length of entropy string"));
   } else {
       var hexfromAnu = qrng.saveentropy(entropy, size, gid, timestamp, function(result) {
-          // save data consumption by not returning the same entropy the client just sent
-          delete result.Entropy;
-
           res.end(JSON.stringify(result));
       });
   } // End if
