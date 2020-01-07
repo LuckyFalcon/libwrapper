@@ -258,9 +258,9 @@ exports.getentropy = function gettoken(gid, pool, callback){
 
   fs.readFile ('./services/entropy/pool/'+gid+".pool", "utf8", function(err, data) {
           if (err){
-              callback(JSON.stringify(1));
+              pool(JSON.stringify(1));
           } else {
-              callback(JSON.parse(data));
+              pool(JSON.stringify(1));
           }
         });
 
