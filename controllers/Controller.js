@@ -216,6 +216,7 @@ exports.entropy = [
         //Set the content type and status code
         res.writeHead(200, {'content-Type': 'application/json'});
             if (!req.query.raw){
+              delete result.Entropy; 
               res.end(JSON.stringify(result));
             } else {
               res.end(JSON.stringify(result));
