@@ -209,7 +209,7 @@ exports.entropy = [
     //Check for GID
     if (req.query.gid && !req.query.size){ 
 
-      qrng.getentropy(req.query.gid, function(result) {
+      qrng.getentropy(req.query.gid, req.query.pool, function(result) {
         if (result == "1") { //File not found
             res.end(JSON.stringify("GID was not found"));     
         } else {//File is found, check for raw.
