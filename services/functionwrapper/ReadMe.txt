@@ -8,7 +8,7 @@ For linux build:
 Add --arch=x86 to node-gyp for x86 build
 Change libAttractFunctions to AttractFunctions in:
 	1. controller/controller.js 
-	2. services/anuapi/anuapi.js
+	2. services/qrngs/anuapi.js
 	3. services/getAttractor/forkedlongcomputation.js
 
 

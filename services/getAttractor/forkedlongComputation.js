@@ -1,5 +1,5 @@
 const path  = require('path');
-const qrng  = require(path.join(process.cwd(), "/services/anuapi/anuapi.js"));
+const qrng  = require(path.join(process.cwd(), "/services/qrngs/anuapi.js"));
 const addon = require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
 const cont  = require(path.join(process.cwd(), '/controllers/Controller'));
 const now   = require("performance-now")

@@ -3,7 +3,8 @@ const { check, validationResult } = require('express-validator');
 const path       = require('path');
 const crypto     = require('crypto');
 const addon      = require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
-const qrng       = require(path.join(process.cwd(), "/services/anuapi/anuapi.js"));
+const anuQrng    = require(path.join(process.cwd(), "/services/qrngs/anuapi.js"));
+const gcpQrng   =  require(path.join(process.cwd(), "/services/qrngs/gcpapi.js"));
 const checkAuth  = require(path.join(process.cwd(), "/services/authentication/check-auth.js"));
 const workerFarm = require('worker-farm')
     , workers    = workerFarm({maxConcurrentWorkers : 3, maxConcurrentWorkers : 1}, require.resolve(path.join(process.cwd(), "/services/getAttractor/forkedlongComputation.js")))
@@ -38,7 +39,7 @@ exports.getPool = (req, res) => {
   //Set the content type and status code
   res.writeHead(200, {'content-Type': 'application/json'});
 
-  qrng.getpool(function(result) {
+  anuQrng.getpool(function(result) {
       res.end(JSON.stringify(result));
   });
 }
@@ -49,7 +50,7 @@ exports.getpools = (req, res) => {
   //Set the content type and status code
   res.writeHead(200, {'content-Type': 'application/json'});
 
-  qrng.getpools(function(result) {
+  anuQrng.getpools(function(result) {
       res.end(JSON.stringify(result));
   });
 }
@@ -97,7 +98,7 @@ exports.setentropy = [
   if (entropy.length != req.body.size){
       res.end(JSON.stringify("size does not match length of entropy string"));
   } else {
-      var hexfromAnu = qrng.saveentropy(entropy, size, gid, timestamp, function(result) {
+      var hexfromAnu = anuQrng.saveentropy(entropy, size, gid, timestamp, function(result) {
           res.end(JSON.stringify(result));
       });
   } // End if
@@ -200,16 +201,26 @@ exports.entropy = [
     .isNumeric()
     .optional(),
 
+  check('gcp')
+    .isBoolean()
+    .optional(),
+
  (req, res, next) => { /* the rest of the existing function */ 
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() })
   }
 
+    //Check for GCP request
+    if (req.query.gcp) {
+      gcpQrng.getEntropy(req, res, next);
+      return;
+    }
+
     //Check for GID
     if (req.query.gid && !req.query.size){ 
 
-      qrng.getentropy(req.query.gid, req.query.pool, function(result) {
+      anuQrng.getentropy(req.query.gid, req.query.pool, function(result) {
         if (result == "1") { //File not found
             res.end(JSON.stringify("GID was not found"));     
         } else {//File is found, check for raw.
@@ -222,13 +233,13 @@ exports.entropy = [
               res.end(JSON.stringify(result));
             }
         }
-      }); //End qrng.getentropy 
+      }); //End anuQrng.getentropy 
 
 
     //Check for size
     } else if (req.query.size && !req.query.gid) {
      
-      var entropy = qrng.getsizeqrng(req.query.size, function(result) {
+      var entropy = anuQrng.getsizeqrng(req.query.size, function(result) {
         if (result == "1") {res.writeHead(400, {'content-Type': 'application/json'}); res.end(JSON.stringify("Size Error, size has to be set to 286 minimum"))}
         else if (result == "2") {res.writeHead(400, {'content-Type': 'application/json'}); res.end(JSON.stringify("Size Error, Minimum size can be set to 286"))}
         else if (result == "3") {res.writeHead(400, {'content-Type': 'application/json'}); res.end(JSON.stringify("Size Error, Maximum size can be set to 6000000"))}
