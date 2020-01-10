@@ -40,10 +40,12 @@ function makeRequestUrl(year, month, day, startTime, endTime) {
 createEntropyObject = function (object_entropy, size) {
     var timestamp = Date.now();
     var entropy = object_entropy.substring(0, size);
+    var gid = crypto.createHash('sha256').update(Buffer.from(entropy)).digest('hex');
 
     var entropyObject = {
         EntropySize: entropy.length,
         Timestamp: timestamp,
+        Gid: gid,
         Entropy: entropy
     }
 
