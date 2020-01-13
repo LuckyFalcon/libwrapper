@@ -4,6 +4,7 @@ const request = require('request');
 const csvparser = require('csv-parse');
 const moment = require('moment');
 const crypto  = require('crypto');
+const extractors = require('randomness-extractors');
 
 // eg. http://global-mind.org/cgi-bin/eggdatareq.pl?z=1&year=2020&month=1&day=10&stime=00%3A00%3A00&etime=23%3A59%3A59
 const API_HOST = "http://global-mind.org";
@@ -17,7 +18,7 @@ const API_HOST = "http://global-mind.org";
 const TRIAL_SIZE = 200;
 
 // The number of seconds it seems to take for most eggs to send their data for near realtime updates
-const ESTIMATED_GCP_UPDATE_DELAY_TIME = 300;
+const ESTIMATED_GCP_UPDATE_DELAY_TIME = 0;
 
 // the averaging number of eggs reporting from the past couple of years (as of 2020-01-10)
 // seems to be 24-26, we'll be conversative and say 24
@@ -36,8 +37,76 @@ function makeRequestUrl(year, month, day, startTime, endTime) {
     return url;
 }
 
+function handleErrors(gcpRequestError, gcpResponse, appResponse) {
+    if (gcpRequestError) {
+        appResponse.writeHead(200, { 'Content-Type': 'application/json' });
+        appResponse.end(JSON.stringify({error: true, type: 'request', message: gcpRequestError}));
+        console.error(gcpRequestError);
+        return true;
+    }
+
+    if (gcpResponse.statusCode != 200) {
+        appResponse.writeHead(200, { 'Content-Type': 'application/json' });
+        appResponse.end(JSON.stringify({error: true, type: 'status_code', message: gcpResponse.statusCode}));
+        console.error("gcpResponse.statusCode != 200: " + gcpResponse.statusCode);
+        return true;
+    }
+
+    return false;
+}
+
+function extractEntropy(requestedSize, appResponse, body) {
+    console.log("GCP response size: " + body.length);
+    var buffer = Buffer.alloc(requestedSize)
+    var offset = 0;
+    // parse the csv output
+    // ref: http://noosphere.princeton.edu/basket_CSV_v2.html
+    csvparser(
+        body,
+        { relax_column_count: true },
+        function (csvParseError, records) {
+            if (csvParseError) {
+                appResponse.writeHead(200, { 'Content-Type': 'application/json' });
+                appResponse.end(JSON.stringify({error: true, type: 'csv_parse', message: csvParseError}));
+                console.error(csvParseError);
+                return;
+            }
+
+            // iterate all lines, process only sample value rows
+            var currentByteArr = [];
+            records.forEach(function (record) {
+                if (record[0] == 13) { // field type 13: actual sample data
+                    _.slice(record, 3) // skip field type, unix timestamp, user friendly timestamp columns
+                    .forEach(function (samplit) {
+                        if (!samplit) {
+                            return; // skip void sample values where there was no report from the egg
+                        }
+
+                        if (offset == parseInt(requestedSize))
+                            return;
+
+                        currentByteArr.push(parseInt(samplit) > TRIAL_SIZE/2 ? 1 : 0);
+
+                        if (currentByteArr.length == 8) {
+                            var vonNeumanned = currentByteArr.join('');
+
+                            //https://github.com/ycmjason/randomness-extractors
+                            //vonNeumanned = extractors.vonNeumannsExtractor([currentByteArr]);
+
+                            buffer.writeUInt8(parseInt(vonNeumanned, 2), offset++);
+                            currentByteArr = [];
+                        }
+                    });
+                }
+            });
+
+            appResponse.writeHead(200, { 'Content-Type': 'application/json' });
+            appResponse.end(JSON.stringify(createEntropyObject(buffer.slice(0, offset).toString('hex'), requestedSize)));
+        });
+}
+
 //Used to create an entropy object
-createEntropyObject = function (object_entropy, size) {
+function createEntropyObject(object_entropy, size) {
     var timestamp = Date.now();
     var entropy = object_entropy.substring(0, size);
     var gid = crypto.createHash('sha256').update(Buffer.from(entropy)).digest('hex');
@@ -58,66 +127,46 @@ exports.getEntropy = function (appRequest, appResponse, next) {
     var yearFmt = now.format('YYYY');
     var monthFmt = now.format('MM');
     var dayFmt = now.format('DD');
-    var requestedByteSize = appRequest.query.size / 2; // divide by 2 because GET request param size is for the hex size
-    var secsOfDataNeeded = Math.round(requestedByteSize / AVG_REPORTING_EGGS) + ESTIMATED_GCP_UPDATE_DELAY_TIME;
-    var startTime = now.subtract(secsOfDataNeeded, 'seconds');
+    console.log("appRequest.query.size: " + appRequest.query.size);
+    var requestedSize = appRequest.query.size * 8; // 8 bits for each sample byte (<= 200)
+    var secsOfDataNeeded = Math.round(requestedSize / AVG_REPORTING_EGGS) + ESTIMATED_GCP_UPDATE_DELAY_TIME;
+    var startTime = moment(now).subtract(secsOfDataNeeded, 'seconds');
     var startTimeFmt = moment(startTime).format('HH:mm:ss') // current UTC 00:00:00 - secsOfDataNeeded
+    var includeYesterday = false;
     if (startTime.isBefore(now, 'day')) {
         // if the start time's day yields to be any day before the current day, then as
         // the GCP API only seems to allow single-day queries, we'll set it to 00:00:00
         // and let the logic later on trigger extra API call(s) to get the extra entropy
         startTimeFmt = '00:00:00';
+
+        includeYesterday = true;
     }
 
-    request(makeRequestUrl(yearFmt, monthFmt, dayFmt, startTimeFmt, endTimeFmt),
-        function (gcpRequestError, gcpResponse, body) {
-            if (gcpRequestError) {
-                // TODO: return json error
-                console.error(err);
+    var yesterdayReqUrl = makeRequestUrl(yearFmt, monthFmt, dayFmt - 1, '00:00:00', '23:59:59');
+    var todayReqUrl = makeRequestUrl(yearFmt, monthFmt, dayFmt, startTimeFmt, endTimeFmt);
+
+    request(todayReqUrl,
+        function (gcpRequestError, gcpResponse, todayBody) {
+            if (handleErrors(gcpRequestError, gcpResponse, appResponse)) {
                 return;
             }
 
-            if (gcpResponse.statusCode != 200) {
-                // TODO: return json error
-                console.error(gcpResponse.statusCode);
-                return;
-            }
-
-            var hexEntropy = "";
-
-            // parse the csv output
-            // ref: http://noosphere.princeton.edu/basket_CSV_v2.html
-            csvparser(
-                body,
-                { relax_column_count: true },
-                function (csvParseError, records) {
-                    if (csvParseError) {
-                        // TODO: return json error
-                        console.error(csvParseError);
-                        return;
-                    }
-
-                    // iterate all lines, process only sample value rows
-                    records.forEach(function (record) {
-                        if (record[0] == 13) { // field type 13: actual sample data
-                            _.slice(record, 3) // skip field type, unix timestamp, user friendly timestamp columns
-                                .forEach(function (samplit) {
-                                    if (!samplit) {
-                                        return; // skip void sample values where there was no report from the egg
-                                    }
-
-                                    // normalize all sample values (0-200 sample range) into 0-0xff and convert to hex, concat
-                                    // N.B. 200 seems a fixed constant, even though we can get it from the API response. hardcoding it seems fine...
-                                    hexEntropy += Math.round((samplit / TRIAL_SIZE * 0xff)).toString(16);
-                                });
+            if (includeYesterday) {
+                // TODO: This is my lazy unfinished work (read hack). If we need more than 1 day's worth of API responses, then just clump all of yesterday's in one go.
+                // Sort out proper time filtering at another stage...
+                request(yesterdayReqUrl,
+                    function (gcpRequestError, gcpResponse, yesterdayBody) {
+                        if (handleErrors(gcpRequestError, gcpResponse, appResponse)) {
+                            return;
                         }
+
+                        console.log("yesterdayBody + todayBody");
+                        extractEntropy(requestedSize, appResponse, yesterdayBody + "\n" + todayBody);
                     });
+                return;
+            }
 
-                    console.log(hexEntropy.length);
-
-                    var resp = createEntropyObject(hexEntropy, appRequest.query.size);
-                    appResponse.writeHead(200, { 'Content-Type': 'application/json' });
-                    appResponse.end(JSON.stringify(resp));
-                });
+            console.log("todayBody");
+            extractEntropy(requestedSize, appResponse, todayBody);
         });
 }

@@ -34,6 +34,7 @@
     "node-addon-api": "^1.7.1",
     "node-gyp": "^6.0.0",
     "performance-now": "^2.1.0",
+    "randomness-extractors": "^1.0.0",
     "rebuild": "^0.1.2",
     "request": "^2.88.0",
     "soap": "^0.29.0",
