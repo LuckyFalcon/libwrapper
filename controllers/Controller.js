@@ -155,9 +155,10 @@ exports.attractors = [
 
   if (req.query.filtering) {var filter = parseFloat(req.query.filtering); 
   } else { var filter = 4.0; } //end if
-  if (req.query.pool){var pool = true
-
+    //Set pool
+  if (req.query.pool){var pool = req.query.pool;
   } else {var pool = false;}
+      
   //Create object with parameters to send to fork
   var myObj = {
       'GID': GID,
@@ -202,6 +203,10 @@ exports.entropy = [
     .optional(),
 
   check('gcp')
+    .isBoolean()
+    .optional(),
+    
+  check('pool')
     .isBoolean()
     .optional(),
 
