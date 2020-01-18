@@ -1,6 +1,7 @@
 'use strict';
-const controller = require('../controllers/Controller');
- 
+const controller = require('../controllers/libAttractController');
+const reportController = require('../controllers/reportController'); 
+
 module.exports = function(app) {
  
   //GET route for version
@@ -35,6 +36,14 @@ module.exports = function(app) {
   app.route('/attractors')
     .get(controller.attractors);
 
+  // POST for sending a trip report
+  app.route('/reports/send')
+    .post(reportController.saveReport);
+
+  // GET for getting list of reports
+  // TODO: Do we need this?
+  //app.route('/reports/list')
+    //.get(reportController.getReports)
 };
 
   
