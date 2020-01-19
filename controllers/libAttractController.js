@@ -536,7 +536,7 @@ exports.makeattractor = function(GID, attractors, gid_valid, centervalid, calc_t
             longitude: empDetails[i].longitude
 
           },
-          bearting: {
+          bearing: {
             distance: empDetails[i].distance,
             initialBearing: empDetails[i].initialBearing,
             finalBearing: empDetails[i].finalBearing,
