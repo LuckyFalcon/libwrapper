@@ -1,6 +1,6 @@
 'use strict';
 const controller = require('../controllers/libAttractController');
-const reportController = require('../controllers/reportController'); 
+const reportController = require('../controllers/reportsController'); 
 
 module.exports = function(app) {
  
@@ -37,7 +37,7 @@ module.exports = function(app) {
     .get(controller.attractors);
 
   // POST for sending a trip report
-  app.route('/reports/send')
+  app.route('/reports/save')
     .post(reportController.saveReport);
 
   // GET for getting list of reports

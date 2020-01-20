@@ -8,6 +8,7 @@ const gcpQrng   =  require(path.join(process.cwd(), "/services/qrngs/gcpapi.js")
 const checkAuth  = require(path.join(process.cwd(), "/services/authentication/check-auth.js"));
 const workerFarm = require('worker-farm')
     , workers    = workerFarm({maxConcurrentWorkers : 3, maxConcurrentWorkers : 1}, require.resolve(path.join(process.cwd(), "/services/getAttractor/forkedlongComputation.js")))
+const reports    = require(path.join(process.cwd(), "/services/reports/save"));
 
 //Used to get the current version of libAttract
 exports.list_version = (req, res) => {
@@ -558,8 +559,12 @@ exports.makeattractor = function(GID, attractors, gid_valid, centervalid, calc_t
      significance: empDetails[i].significance,
      probability: empDetails[i].probability,
      FILTERING_SIGNIFICANCE: empDetails[i].FILTERING_SIGNIFICANCE
-
    }
+
+   // Save generated point and stats from lib to DB
+   console.log("############ START SAVE DB"); // TODO: remove
+   reports.saveGeneratedPoints(myArray, calc_time);
+   console.log("############ END SAVE DB"); // TODO: remove
 
    myArray.push({
         "gid_valid": gid_valid,
