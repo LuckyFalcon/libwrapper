@@ -218,7 +218,7 @@ exports.entropy = [
   }
 
     //Check for GCP request
-    if (req.query.gcp) {
+    if (req.query.gcp === 'true') {
       gcpQrng.getEntropy(req, res, next);
       return;
     }
