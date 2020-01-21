@@ -561,11 +561,6 @@ exports.makeattractor = function(GID, attractors, gid_valid, centervalid, calc_t
      FILTERING_SIGNIFICANCE: empDetails[i].FILTERING_SIGNIFICANCE
    }
 
-   // Save generated point and stats from lib to DB
-   console.log("############ START SAVE DB"); // TODO: remove
-   reports.saveGeneratedPoints(myArray, calc_time);
-   console.log("############ END SAVE DB"); // TODO: remove
-
    myArray.push({
         "gid_valid": gid_valid,
         "centervalid": centervalid, 
