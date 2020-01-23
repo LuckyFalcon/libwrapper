@@ -7,6 +7,7 @@ sql.on('error', err => {
 });
 
 async function connectDB() {
+    // TODO: implement pooling... will probably get Connection Closed errors for more than 2 concurrent INSERT attempts
     const dbConfig = {
         user: config.DB.USER,
         password: config.DB.PASSWORD,
@@ -20,7 +21,7 @@ async function connectDB() {
 }
 
 // Save trip report
-// TODO: add error handling
+// TODO: add proper error handling
 async function saveTripReport(req, res, next) {
     var report = req.body;
     await connectDB();
