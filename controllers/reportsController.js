@@ -6,8 +6,8 @@ const reports     = require(path.join(process.cwd(), '/services/reports/save'));
 
 // Used to save a trip report to the database
 exports.saveReport = [
-  check('point_id') // point ID generated when libwrapper generates the point
-    .isString(),
+ // check('point_id') // point ID generated when libwrapper generates the point
+ //   .isString(),
 
   // check('user_id')
   //   .not().isEmpty()
@@ -50,9 +50,6 @@ exports.saveReport = [
 
     res.writeHead(200, {'content-type': 'application/json'});
 
-    reports.saveReport(req);
-
-    res.write(JSON.stringify({status: 'OK'}));
-    res.end();
+    reports.saveTripReport(req, res, next);
   }
 ];
