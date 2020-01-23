@@ -74,7 +74,7 @@ async function saveTripReport(req, res, next) {
     insertQuery += "integral_score,";
     insertQuery += "significance,";
     insertQuery += "probability";
-    insertQuery += ") VALUES (";
+    insertQuery += ") OUTPUT Inserted.id VALUES (";
     insertQuery += `'${report.user_id}',`; // userid - 64 char hex string of sha256 hash string of their platform's user ID
     insertQuery += `'${report.platform}',`; // platform - int (representing the enum) starting from 0
                                             // emulator     - 0
@@ -164,8 +164,8 @@ async function saveTripReport(req, res, next) {
             return;
         }
 
-        console.log("Trip report saved");
-        res.write(JSON.stringify({status: 'OK'}));
+        console.log("Trip report saved: " + result[0].id.toLowerCase());
+        res.write(JSON.stringify({status: 'OK', id: result[0].id.toLowerCase()}));
         res.end();
     })
 }
