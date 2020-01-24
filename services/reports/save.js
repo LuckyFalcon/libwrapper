@@ -50,7 +50,7 @@ async function saveTripReport(req, res, next) {
             insertQuery += "datetime,";
             insertQuery += "visited,";
             insertQuery += "point_type,";
-            // insertQuery += "intent_set,";
+            insertQuery += "intent_set,";
             insertQuery += "artifact_collected,";
             insertQuery += "fucking_amazing,";
             insertQuery += "rating_meaningfulness,";
@@ -126,7 +126,7 @@ async function saveTripReport(req, res, next) {
                                                         // ChainAnomaly
                                                         // ChainQuantum
                                                         // ChainPseudo
-            // insertQuery += `'${report.intent_set}',`; // intent_set - string of any intentions they set, not supported by app yet
+            insertQuery += `'${report.intent_set}',`; // intent_set - string of any intentions they set, not supported by app yet
             insertQuery += `'${report.artifact_collected}',`; // artifact_collected: int; 1 - yes, 0 - no
             insertQuery += `'${report.fucking_amazing}',`; // fucking_amazing: int; 1 - yes, 0 - no
             insertQuery += `'${report.rating_meaningfulness}',`; // rating_meaningfulness: string
@@ -213,8 +213,8 @@ async function saveTripReport(req, res, next) {
             text += `What 3 words address: [${w3wBody.words}](https://what3words.com/${w3wBody.words})  \n`;
             text += `[Google Maps](https://www.google.com/maps/place/${report.latitude}+${report.longitude}/@${report.latitude}+${report.longitude},18z)  |  `;
             text += `[Google Earth](https://earth.google.com/web/search/${report.latitude},${report.longitude})  \n\n`;
-            text += `Intent set: ${report.intent_set}  \n`;
-            text += `Intents suggested: ${report.intent_suggestions}  \n\n`;
+            text += `Intent set: ${report.intent_set}  \n\n`;
+            // text += `Intents suggested: ${report.intent_suggestions}  \n\n`;
             text += `Artifact(s) collected? ${report.artifact_collected === '1' ? 'Yes' : 'No'}  \n`;
             text += `Was a 'wow and astounding' trip?  ${report.fucking_amazing === '1' ? 'Yes' : 'No'}  \n`;
             text += `## Trip Ratings  \n`;
