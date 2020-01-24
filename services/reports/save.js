@@ -42,6 +42,7 @@ async function saveTripReport(req, res, next) {
             var w3wBody = JSON.parse(w3wBodyJSON);
             var country = countries.getName(w3wBody.country, "en");
 
+            // TODO: uncomment commented out fields when the app supports report them one day. center... just couldnt figure how how to do it with this node module
             var insertQuery = `INSERT INTO reports_dev (`;
             // insertQuery += "id,"; Automatically incremented from the CREATE TABLE... id uniqueidentifier default NEWSEQUENTIALID() primary key command
             insertQuery += "user_id,";
@@ -49,7 +50,7 @@ async function saveTripReport(req, res, next) {
             insertQuery += "datetime,";
             insertQuery += "visited,";
             insertQuery += "point_type,";
-            insertQuery += "intent_set,";
+            // insertQuery += "intent_set,";
             insertQuery += "artifact_collected,";
             insertQuery += "fucking_amazing,";
             insertQuery += "rating_meaningfulness,";
@@ -58,14 +59,14 @@ async function saveTripReport(req, res, next) {
             insertQuery += "rating_strangeness,";
             insertQuery += "rating_synchroncity,";
             insertQuery += "text,";
-            insertQuery += "photos,";
-            insertQuery += "intent_suggestions,";
-            insertQuery += "time_intent_suggestions_set,";
+            // insertQuery += "photos,";
+            // insertQuery += "intent_suggestions,";
+            // insertQuery += "time_intent_suggestions_set,";
             insertQuery += "what_3_words,";
             insertQuery += "nearest_place,";
             insertQuery += "country,";
             insertQuery += "short_hash_id,";
-            insertQuery += "num_water_points_skipped,";
+            // insertQuery += "num_water_points_skipped,";
             insertQuery += "gid,";
             insertQuery += "tid,";
             insertQuery += "lid,";
@@ -125,7 +126,7 @@ async function saveTripReport(req, res, next) {
                                                         // ChainAnomaly
                                                         // ChainQuantum
                                                         // ChainPseudo
-            insertQuery += `'${report.intent_set}',`; // intent_set - string of any intentions they set, not supported by app yet
+            // insertQuery += `'${report.intent_set}',`; // intent_set - string of any intentions they set, not supported by app yet
             insertQuery += `'${report.artifact_collected}',`; // artifact_collected: int; 1 - yes, 0 - no
             insertQuery += `'${report.fucking_amazing}',`; // fucking_amazing: int; 1 - yes, 0 - no
             insertQuery += `'${report.rating_meaningfulness}',`; // rating_meaningfulness: string
@@ -134,14 +135,14 @@ async function saveTripReport(req, res, next) {
             insertQuery += `'${report.rating_strangeness}',`; // rating_strangeness: string
             insertQuery += `'${report.rating_synchroncity}',`; // rating_synchroncity: string
             insertQuery += `'${report.text}',`; // text: string (the actual report text they type up)
-            insertQuery += `'${report.photos}',`; // photos: string (comma separated URLs of images, like on imgur)
-            insertQuery += `'${report.intent_suggestions}',`; // intent_suggestions: string, comma separated 
-            insertQuery += `'${report.time_intent_suggestions_set}',`; // time_intent_suggestions_set; follows same format as datetime field
+            // insertQuery += `'${report.photos}',`; // photos: string (comma separated URLs of images, like on imgur)
+            // insertQuery += `'${report.intent_suggestions}',`; // intent_suggestions: string, comma separated 
+            // insertQuery += `'${report.time_intent_suggestions_set}',`; // time_intent_suggestions_set; follows same format as datetime field
             insertQuery += `'${w3wBody.words}',`; // what_3_words - string; one.two.three words 
             insertQuery += `'${w3wBody.nearestPlace}',`; // nearest_place - string, returned from what-3-words API
             insertQuery += `'${country}',`; // country - string; returned from what-3-words API
             insertQuery += `'${report.short_hash_id}',`; // short_hash_id - string; 8 hex chars of Crc32 hash of user_id and datetime fields concated together
-            insertQuery += `'${report.num_water_points_skipped}',`; // num_water_points_skipped; int - set to 0 if function isn't implemented
+            // insertQuery += `'${report.num_water_points_skipped}',`; // num_water_points_skipped; int - set to 0 if function isn't implemented
             // stuff below is from the libAttract
             insertQuery += `'${report.gid}',`; // gid - string; hex sha256 gid
             insertQuery += `'${report.tid}',`; // tid
