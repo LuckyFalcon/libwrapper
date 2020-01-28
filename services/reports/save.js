@@ -42,6 +42,16 @@ async function saveTripReport(req, res, next) {
             var w3wBody = JSON.parse(w3wBodyJSON);
             var country = countries.getName(w3wBody.country, "en");
 
+            // Dirty SQL safety
+            var sqlSafeIntentSet;
+            if (report.intent_set) {
+                sqlSafeIntentSet = report.intent_set.replace("'", "''");
+            }
+            var sqlSafeReportText;
+            if (report.text) {
+                sqlSafeReportText = report.text.replace("'", "''");
+            }
+
             // TODO: uncomment commented out fields when the app supports report them one day. center... just couldnt figure how how to do it with this node module
             var insertQuery = `INSERT INTO reports_dev (`;
             // insertQuery += "id,"; Automatically incremented from the CREATE TABLE... id uniqueidentifier default NEWSEQUENTIALID() primary key command
@@ -126,7 +136,7 @@ async function saveTripReport(req, res, next) {
                                                         // ChainAnomaly
                                                         // ChainQuantum
                                                         // ChainPseudo
-            insertQuery += `'${report.intent_set}',`; // intent_set - string of any intentions they set, not supported by app yet
+            insertQuery += `'${sqlSafeIntentSet}',`; // intent_set - string of any intentions they set, not supported by app yet
             insertQuery += `'${report.artifact_collected}',`; // artifact_collected: int; 1 - yes, 0 - no
             insertQuery += `'${report.fucking_amazing}',`; // fucking_amazing: int; 1 - yes, 0 - no
             insertQuery += `'${report.rating_meaningfulness}',`; // rating_meaningfulness: string
@@ -134,7 +144,7 @@ async function saveTripReport(req, res, next) {
             insertQuery += `'${report.rating_importance}',`; // rating_importance: string
             insertQuery += `'${report.rating_strangeness}',`; // rating_strangeness: string
             insertQuery += `'${report.rating_synchroncity}',`; // rating_synchroncity: string
-            insertQuery += `'${report.text}',`; // text: string (the actual report text they type up)
+            insertQuery += `'${sqlSafeReportText}',`; // text: string (the actual report text they type up)
             // insertQuery += `'${report.photos}',`; // photos: string (comma separated URLs of images, like on imgur)
             // insertQuery += `'${report.intent_suggestions}',`; // intent_suggestions: string, comma separated 
             // insertQuery += `'${report.time_intent_suggestions_set}',`; // time_intent_suggestions_set; follows same format as datetime field
