@@ -183,56 +183,64 @@ async function saveTripReport(req, res, next) {
                 }
 
                 console.log("Trip report saved: " + result[0].id.toLowerCase());
-                res.write(JSON.stringify({
-                                            status: 'OK',
-                                            id: result[0].id.toLowerCase(),
-                                            nearestPlace: w3wBody.nearestPlace,
-                                            country: country,
-                                            what3words: w3wBody.words,
-                                        }));
-                res.end();
+
+                // Reddit! TODO: make it its own file/function
+                const r = new snoowrap({
+                    userAgent: config.REDDIT.USER_AGENT,
+                    clientId: config.REDDIT.CLIENT_ID,
+                    clientSecret: config.REDDIT.CLIENT_SECRET,
+                    refreshToken: config.REDDIT.REFRESH_TOKEN
+                });
+
+                var text = "";
+                text += `Intention Driven Anomaly found  \n`;
+                text += `🦉📱-${report.short_hash_id} (${report.latitude.toFixed(6)},${report.longitude.toFixed(6)})  \n`;
+                text += `Type: ${report.point_type}  \n`;
+                text += `Radius: ${report.radiusM.toFixed(0)}m  \n`;
+                text += `Power: ${report.power.toFixed(2)}  \n`;
+                text += `z-score: ${report.z_score.toFixed(2)}  \n`;
+                text += `  \n\n`;
+                text += `Report: ${report.text}  \n\n`;
+                text += `What 3 words address: [${w3wBody.words}](https://what3words.com/${w3wBody.words})  \n`;
+                text += `[Google Maps](https://www.google.com/maps/place/${report.latitude}+${report.longitude}/@${report.latitude}+${report.longitude},18z)  |  `;
+                text += `[Google Earth](https://earth.google.com/web/search/${report.latitude},${report.longitude})  \n\n`;
+                if (report.intent_set && report.intent_set !== '0') text += `Intent set: ${report.intent_set}  \n\n`;
+                // text += `Intents suggested: ${report.intent_suggestions}  \n\n`;
+                text += `Artifact(s) collected? ${report.artifact_collected === '1' ? 'Yes' : 'No'}  \n`;
+                text += `Was a 'wow and astounding' trip?  ${report.fucking_amazing === '1' ? 'Yes' : 'No'}  \n`;
+                text += `## Trip Ratings  \n`;
+                text += `Meaningfulness: ${report.rating_meaningfulness}  \n`;
+                text += `Emotional: ${report.rating_emotional}  \n`;
+                text += `Importance: ${report.rating_importance}  \n`;
+                text += `Strangeness: ${report.rating_strangeness}  \n`;
+                text += `Synchronicity: ${report.rating_synchroncity}  \n`;
+                text += `  \n\n`;
+                text += `${report.user_id} ${report.short_hash_id} ${report.gid}  \n`;
+
+                var title = `Randonaut Trip Report from ${w3wBody.nearestPlace} (${country})`;
+                r.submitSelfpost({
+                    subredditName: 'soliaxplayground',
+                    //subredditName: 'randonaut_reports',
+                    title: title,
+                    text: text
+                }).then(function (redditResult) {
+                    var redditPostId = redditResult.name.replace("t3_", "");
+                    
+                    var jsonResponse = JSON.stringify({
+                        status: 'OK',
+                        id: result[0].id.toLowerCase(),
+                        nearestPlace: w3wBody.nearestPlace,
+                        country: country,
+                        what3words: w3wBody.words,
+                        redditPostId: redditPostId
+                    });
+
+                    console.log(jsonResponse);
+
+                    res.write(jsonResponse);
+                    res.end();
+                });
             })
-
-            // Reddit! TODO: make it its own file/function
-            const r = new snoowrap({
-                userAgent: config.REDDIT.USER_AGENT,
-                clientId: config.REDDIT.CLIENT_ID,
-                clientSecret: config.REDDIT.CLIENT_SECRET,
-                refreshToken: config.REDDIT.REFRESH_TOKEN
-            });
-
-            var text = "";
-            text += `Intention Driven Anomaly found  \n`;
-            text += `🦉📱-${report.short_hash_id} (${report.latitude.toFixed(6)},${report.longitude.toFixed(6)})  \n`;
-            text += `Type: ${report.point_type}  \n`;
-            text += `Radius: ${report.radiusM.toFixed(0)}m  \n`;
-            text += `Power: ${report.power.toFixed(2)}  \n`;
-            text += `z-score: ${report.z_score.toFixed(2)}  \n`;
-            text += `  \n\n`;
-            text += `Report: ${report.text}  \n\n`;
-            text += `What 3 words address: [${w3wBody.words}](https://what3words.com/${w3wBody.words})  \n`;
-            text += `[Google Maps](https://www.google.com/maps/place/${report.latitude}+${report.longitude}/@${report.latitude}+${report.longitude},18z)  |  `;
-            text += `[Google Earth](https://earth.google.com/web/search/${report.latitude},${report.longitude})  \n\n`;
-            if (report.intent_set && report.intent_set !== '0') text += `Intent set: ${report.intent_set}  \n\n`;
-            // text += `Intents suggested: ${report.intent_suggestions}  \n\n`;
-            text += `Artifact(s) collected? ${report.artifact_collected === '1' ? 'Yes' : 'No'}  \n`;
-            text += `Was a 'wow and astounding' trip?  ${report.fucking_amazing === '1' ? 'Yes' : 'No'}  \n`;
-            text += `## Trip Ratings  \n`;
-            text += `Meaningfulness: ${report.rating_meaningfulness}  \n`;
-            text += `Emotional: ${report.rating_emotional}  \n`;
-            text += `Importance: ${report.rating_importance}  \n`;
-            text += `Strangeness: ${report.rating_strangeness}  \n`;
-            text += `Synchronicity: ${report.rating_synchroncity}  \n`;
-            text += `  \n\n`;
-            text += `${report.user_id} ${report.short_hash_id} ${report.gid}  \n`;
-
-            var title = `Randonaut Trip Report from ${w3wBody.nearestPlace} (${country})`;
-            r.submitSelfpost({
-                subredditName: 'soliaxplayground',
-                //subredditName: 'randonaut_reports',
-                title: title,
-                text: text
-            }).then(console.log);
         }
     );
 }
