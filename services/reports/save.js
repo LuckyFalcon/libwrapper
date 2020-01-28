@@ -213,7 +213,7 @@ async function saveTripReport(req, res, next) {
             text += `What 3 words address: [${w3wBody.words}](https://what3words.com/${w3wBody.words})  \n`;
             text += `[Google Maps](https://www.google.com/maps/place/${report.latitude}+${report.longitude}/@${report.latitude}+${report.longitude},18z)  |  `;
             text += `[Google Earth](https://earth.google.com/web/search/${report.latitude},${report.longitude})  \n\n`;
-            if (report.intent_set) text += `Intent set: ${report.intent_set}  \n\n`;
+            if (report.intent_set && report.intent_set !== '0') text += `Intent set: ${report.intent_set}  \n\n`;
             // text += `Intents suggested: ${report.intent_suggestions}  \n\n`;
             text += `Artifact(s) collected? ${report.artifact_collected === '1' ? 'Yes' : 'No'}  \n`;
             text += `Was a 'wow and astounding' trip?  ${report.fucking_amazing === '1' ? 'Yes' : 'No'}  \n`;
