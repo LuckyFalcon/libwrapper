@@ -3,7 +3,7 @@ const sql       = require('mssql');
 const path      = require('path');
 const snoowrap  = require('snoowrap');
 const config    = require(path.join(process.cwd(), 'config'));
-var countries = require("i18n-iso-countries");
+const countries = require("i18n-iso-countries");
 
 sql.on('error', err => {
     console.error("sql error: " + err);
@@ -53,7 +53,7 @@ async function saveTripReport(req, res, next) {
             }
 
             // TODO: uncomment commented out fields when the app supports report them one day. center... just couldnt figure how how to do it with this node module
-            var insertQuery = `INSERT INTO reports_dev (`;
+            var insertQuery = `INSERT INTO ${config.DB.REPORTS_TABLE} (`;
             // insertQuery += "id,"; Automatically incremented from the CREATE TABLE... id uniqueidentifier default NEWSEQUENTIALID() primary key command
             insertQuery += "user_id,";
             insertQuery += "platform,";
@@ -229,8 +229,7 @@ async function saveTripReport(req, res, next) {
 
                 var title = `Randonaut Trip Report from ${w3wBody.nearestPlace} (${country})`;
                 r.submitSelfpost({
-                    subredditName: 'soliaxplayground',
-                    //subredditName: 'randonaut_reports',
+                    subredditName: config.REDDIT.SUBREDDIT,
                     title: title,
                     text: text
                 }).then(function (redditResult) {
