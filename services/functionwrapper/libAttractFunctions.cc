@@ -3,8 +3,8 @@
 #include <nan.h>
 
 //C headers for the lib
-#include "cppsrc/export_h.h"
-#include "cppsrc/test_coords.h"
+#include "cppsrc/libAttract/export_h.h"
+#include "cppsrc/libAttract/test_coords.h"
 #include <vector>
 
 //For buffer

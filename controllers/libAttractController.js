@@ -5,6 +5,7 @@ const crypto     = require('crypto');
 const addon      = require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
 const anuQrng    = require(path.join(process.cwd(), "/services/qrngs/anuapi.js"));
 const gcpQrng   =  require(path.join(process.cwd(), "/services/qrngs/gcpapi.js"));
+const steveQrng   =  require(path.join(process.cwd(), "/services/qrngs/temporalapi.js"));
 const checkAuth  = require(path.join(process.cwd(), "/services/authentication/check-auth.js"));
 const workerFarm = require('worker-farm')
     , workers    = workerFarm({maxConcurrentWorkers : 3}, require.resolve(path.join(process.cwd(), "/services/getAttractor/forkedlongComputation.js")))
@@ -219,6 +220,12 @@ exports.entropy = [
     //Check for GCP request
     if (req.query.gcp === 'true') {
       gcpQrng.getEntropy(req, res, next);
+      return;
+    }
+
+    //Check for SteveLib (libTemporal) request
+    if (req.query.temporal === 'true') {
+      steveQrng.getEntropy(req, res, next);
       return;
     }
 
