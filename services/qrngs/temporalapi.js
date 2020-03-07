@@ -21,6 +21,7 @@ function createEntropyObject(object_entropy, size) {
 exports.getEntropy = function (appRequest, appResponse, next) {
   var requestedSize = parseInt(appRequest.query.size);
   var buffer = addon.ohSteveOhSteveGiveMeRandomness(requestedSize);
+  console.log("invoking libTemporal at requestedSize = " + requestedSize);
   appResponse.writeHead(200, { 'Content-Type': 'application/json' });
   appResponse.end(JSON.stringify(createEntropyObject(buffer.slice(0, requestedSize).toString('hex'), requestedSize)));
 }
