@@ -9,11 +9,9 @@ static BookHitter *steve;
 Napi::Value ohSteveOhSteveGiveMeRandomness(const Napi::CallbackInfo& info) {
   // get steve to divulge magical temporal randomness from the brain of your device
   uint32_t OutLen = info[0].As<Napi::Number>().Int32Value();
-  unsigned char* Output = (unsigned char*)malloc(OutLen);
-  bh_hitbooks(steve, Output, OutLen);
-  free(Output);
-
-  return Napi::Buffer<unsigned char>::New(info.Env(), OutLen);
+  auto B = Napi::Buffer<unsigned char>::New(info.Env(), OutLen);
+  bh_hitbooks(steve, B.Data(), OutLen);
+  return B;
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
