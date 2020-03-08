@@ -10,6 +10,7 @@ function createResponseObject(entropy, size) {
 
     var entropyObject = {
         EntropySize: entropy.length,
+        Type: "Temporal",
         Timestamp: timestamp,
         Gid: gid,
         Entropy: entropy.toString('hex')
@@ -28,7 +29,7 @@ exports.getEntropy = function (appRequest, appResponse, next) {
   var responseJson = JSON.stringify(responseObject);
 
   // Write file to disk by GID
-  fs.writeFile ('./services/entropy/temporal/'+responseObject.Gid+".hex", responseJson, function(err) {
+  fs.writeFile ('./services/entropy/'+responseObject.Gid+".hex", responseJson, function(err) {
     if (err) throw err;
   });
 
