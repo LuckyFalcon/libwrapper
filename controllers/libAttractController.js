@@ -2,13 +2,13 @@
 const { check, validationResult } = require('express-validator');
 const path       = require('path');
 const crypto     = require('crypto');
-const addon      = require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
+const addon      = null;//require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
 const anuQrng    = require(path.join(process.cwd(), "/services/qrngs/anuapi.js"));
 const gcpQrng   =  require(path.join(process.cwd(), "/services/qrngs/gcpapi.js"));
 const steveQrng   =  require(path.join(process.cwd(), "/services/qrngs/temporalapi.js"));
 const checkAuth  = require(path.join(process.cwd(), "/services/authentication/check-auth.js"));
 const workerFarm = require('worker-farm')
-    , workers    = workerFarm({maxConcurrentWorkers : 3}, require.resolve(path.join(process.cwd(), "/services/getAttractor/forkedlongComputation.js")))
+    , workers    = workerFarm({maxConcurrentWorkers : 1}, require.resolve(path.join(process.cwd(), "/services/getAttractor/forkedlongComputation.js")))
 
 //Used to get the current version of libAttract
 exports.list_version = (req, res) => {
