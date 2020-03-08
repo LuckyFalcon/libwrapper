@@ -1,9 +1,10 @@
 // libTemporal (SteveLib) wrapper
 const addon   = require('../../build/Release/TemporalFunctions');
 const crypto  = require('crypto');
+const fs      = require('fs');
 
-//Used to create an entropy object
-function createEntropyObject(entropy, size) {
+// Used to create an entropy response object
+function createResponseObject(entropy, size) {
     var timestamp = Date.now();
     var gid = crypto.createHash('sha256').update(entropy).digest('hex');
 
@@ -19,10 +20,18 @@ function createEntropyObject(entropy, size) {
 
 exports.getEntropy = function (appRequest, appResponse, next) {
   var requestedSize = parseInt(appRequest.query.size);
-  var buffer = addon.ohSteveOhSteveGiveMeRandomness(requestedSize);
   console.log("invoking libTemporal at requestedSize = " + requestedSize);
+
+  var buffer = addon.ohSteveOhSteveGiveMeRandomness(requestedSize);
+
+  var responseObject = createResponseObject(buffer.slice(0, requestedSize));
+  var responseJson = JSON.stringify(responseObject);
+
+  // Write file to disk by GID
+  fs.writeFile ('./services/entropy/temporal/'+responseObject.Gid+".hex", responseJson, function(err) {
+    if (err) throw err;
+  });
+
   appResponse.writeHead(200, { 'Content-Type': 'application/json' });
-  var response = JSON.stringify(createEntropyObject(buffer.slice(0, requestedSize), requestedSize));
-  //console.log("response>>\n" + response)
-  appResponse.end(response);
+  appResponse.end(responseJson);
 }
