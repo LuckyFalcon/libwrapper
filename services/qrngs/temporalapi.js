@@ -3,16 +3,15 @@ const addon   = require('../../build/Release/TemporalFunctions');
 const crypto  = require('crypto');
 
 //Used to create an entropy object
-function createEntropyObject(object_entropy, size) {
+function createEntropyObject(entropy, size) {
     var timestamp = Date.now();
-    var entropy = object_entropy.substring(0, size);
-    var gid = crypto.createHash('sha256').update(Buffer.from(entropy)).digest('hex');
+    var gid = crypto.createHash('sha256').update(entropy).digest('hex');
 
     var entropyObject = {
         EntropySize: entropy.length,
         Timestamp: timestamp,
         Gid: gid,
-        Entropy: entropy
+        Entropy: entropy.toString('hex')
     }
 
     return entropyObject;
@@ -23,5 +22,7 @@ exports.getEntropy = function (appRequest, appResponse, next) {
   var buffer = addon.ohSteveOhSteveGiveMeRandomness(requestedSize);
   console.log("invoking libTemporal at requestedSize = " + requestedSize);
   appResponse.writeHead(200, { 'Content-Type': 'application/json' });
-  appResponse.end(JSON.stringify(createEntropyObject(buffer.slice(0, requestedSize).toString('hex'), requestedSize)));
+  var response = JSON.stringify(createEntropyObject(buffer.slice(0, requestedSize), requestedSize));
+  //console.log("response>>\n" + response)
+  appResponse.end(response);
 }
