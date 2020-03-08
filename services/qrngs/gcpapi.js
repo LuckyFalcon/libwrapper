@@ -5,6 +5,7 @@ const csvparser = require('csv-parse');
 const moment = require('moment');
 const crypto  = require('crypto');
 const extractors = require('randomness-extractors');
+const fs         = require('fs');
 
 // eg. http://global-mind.org/cgi-bin/eggdatareq.pl?z=1&year=2020&month=1&day=10&stime=00%3A00%3A00&etime=23%3A59%3A59
 const API_HOST = "http://global-mind.org";
@@ -55,7 +56,7 @@ function handleErrors(gcpRequestError, gcpResponse, appResponse) {
     return false;
 }
 
-function extractEntropy(requestedSize, appResponse, body) {
+function extractEntropy(requestedSize, appResponse, body, callback) {
     console.log("GCP response size: " + body.length);
     var buffer = Buffer.alloc(requestedSize)
     var offset = 0;
@@ -99,9 +100,9 @@ function extractEntropy(requestedSize, appResponse, body) {
                     });
                 }
             });
+            callback(createEntropyObject(buffer.slice(0, offset).toString('hex'), requestedSize));
 
-            appResponse.writeHead(200, { 'Content-Type': 'application/json' });
-            appResponse.end(JSON.stringify(createEntropyObject(buffer.slice(0, offset).toString('hex'), requestedSize)));
+           
         });
 }
 
@@ -121,7 +122,7 @@ function createEntropyObject(object_entropy, size) {
     return entropyObject;
 }
 
-exports.getEntropy = function (appRequest, appResponse, next) {
+exports.getEntropy = function (appRequest, appResponse, callback) {
     var now = moment(moment().utc()).subtract(ESTIMATED_GCP_UPDATE_DELAY_TIME, 'seconds');
     var endTimeFmt = moment(now).format('HH:mm:ss'); // current UTC 00:00:00
     var yearFmt = now.format('YYYY');
@@ -166,7 +167,20 @@ exports.getEntropy = function (appRequest, appResponse, next) {
                 return;
             }
 
-            console.log("todayBody");
-            extractEntropy(requestedSize, appResponse, todayBody);
+            //TODO: Send callback to function -> is really wacky solution, fix later
+            extractEntropy(requestedSize, appResponse, todayBody, function(result) {
+                if (result == "1") {callback(null, "GID invalid");
+                } else {
+                                fs.writeFile ('./services/entropy/gcp/'+result.Gid+".gcp", JSON.stringify(result), function(err) {
+                if (err){
+                    callback(JSON.stringify(1));
+                } else {
+                    console.log('complete');
+                    callback(result);
+                }
+            });
+                }
+      
         });
+    });
 }

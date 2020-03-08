@@ -19,20 +19,21 @@ function createResponseObject(entropy, size) {
     return entropyObject;
 }
 
-exports.getEntropy = function (appRequest, appResponse, next) {
+exports.getEntropy = function (appRequest, appResponse, callback) {
   var requestedSize = parseInt(appRequest.query.size);
   console.log("invoking libTemporal at requestedSize = " + requestedSize);
 
   var buffer = addon.ohSteveOhSteveGiveMeRandomness(requestedSize);
 
   var responseObject = createResponseObject(buffer.slice(0, requestedSize));
-  var responseJson = JSON.stringify(responseObject);
 
   // Write file to disk by GID
-  fs.writeFile ('./services/entropy/'+responseObject.Gid+".hex", responseJson, function(err) {
-    if (err) throw err;
+  fs.writeFile ('./services/entropy/temporal/'+responseObject.Gid+".steve", JSON.stringify(responseObject), function(err) {
+    if (err){
+      callback(JSON.stringify(1));
+    } else {
+      console.log('complete');
+      callback(responseObject);
+    }
   });
-
-  appResponse.writeHead(200, { 'Content-Type': 'application/json' });
-  appResponse.end(responseJson);
 }

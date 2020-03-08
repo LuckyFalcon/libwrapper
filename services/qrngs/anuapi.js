@@ -253,20 +253,38 @@ exports.saveentropy = function gettoken(entropy, size, gid, timestamp, callback)
 } //End Function
 
 //Used for getting entropy with GID
-exports.getentropy = function gettoken(gid, pool, callback){
-  if (pool == 'true'){
-
-  fs.readFile ('./services/entropy/pool/'+gid+".pool", "utf8", function(err, data) {
+exports.getentropy = function gettoken(gid, pool, temporal, gcp, callback){
+  
+  switch(true){
+    case pool:
+        fs.readFile ('./services/entropy/pool/'+gid+".pool", "utf8", function(err, data) {
           if (err){
             callback(JSON.stringify(1));
           } else {
             callback(JSON.parse(data));
           }
         });
-
-  } else {
-
-  fs.readFile ('./services/entropy/'+gid+".hex", "utf8", function(err, data) {
+        break;
+    case temporal:
+        fs.readFile ('./services/entropy/temporal/'+gid+".steve", "utf8", function(err, data) {
+          if (err){
+            callback(JSON.stringify(1));
+          } else {
+            callback(JSON.parse(data));
+          }
+        });
+        break;
+    case gcp:
+        fs.readFile ('./services/entropy/gcp/'+gid+".gcp", "utf8", function(err, data) {
+          if (err){
+            callback(JSON.stringify(1));
+          } else {
+            callback(JSON.parse(data));
+          }
+        });
+        break;
+    default:
+      fs.readFile ('./services/entropy/'+gid+".hex", "utf8", function(err, data) {
           if (err){
               callback(JSON.stringify(1));
           } else {
@@ -274,6 +292,7 @@ exports.getentropy = function gettoken(gid, pool, callback){
           }
         });
   }
+
 } //End Function
 
 //Used for getting all pools available

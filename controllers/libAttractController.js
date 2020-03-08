@@ -2,7 +2,7 @@
 const { check, validationResult } = require('express-validator');
 const path       = require('path');
 const crypto     = require('crypto');
-const addon      = null;//require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
+const addon      = require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
 const anuQrng    = require(path.join(process.cwd(), "/services/qrngs/anuapi.js"));
 const gcpQrng   =  require(path.join(process.cwd(), "/services/qrngs/gcpapi.js"));
 const steveQrng   =  require(path.join(process.cwd(), "/services/qrngs/temporalapi.js"));
@@ -130,6 +130,14 @@ exports.attractors = [
     .isBoolean()
     .optional(),
 
+  check('temporal')
+    .isBoolean()
+    .optional(),
+
+  check('gcp')
+    .isBoolean()
+    .optional(),
+
  async function attractors(req, res, next) { /* the rest of the existing function */ 
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
@@ -159,7 +167,24 @@ exports.attractors = [
     //Set pool
   if (req.query.pool){var pool = req.query.pool;
   } else {var pool = false;}
-      
+
+  //req.query contains string values
+  switch ("true"){
+    case req.query.pool: 
+      var pool = true;
+      break;
+    case req.query.temporal: 
+      var temporal = true;
+      break;
+    case req.query.gcp: 
+      var gcp = true;
+      break;
+    default:
+      var pool = false;
+      var temporal = false;
+      var gcp = false;
+  }
+
   //Create object with parameters to send to fork
   var myObj = {
       'GID': GID,
@@ -168,7 +193,9 @@ exports.attractors = [
       'y': y,
       'radius': radius,
       'filter': filter,
-      'pool': pool
+      'pool': pool,
+      'temporal': temporal,
+      'gcp': gcp
   }
 
   //Send object to worker
@@ -219,13 +246,39 @@ exports.entropy = [
 
     //Check for GCP request
     if (req.query.gcp === 'true') {
-      gcpQrng.getEntropy(req, res, next);
+      gcpQrng.getEntropy(req, res, function(result) {
+        if (result == "1") { //File not found
+            res.end(JSON.stringify("GID was not found"));     
+        } else {//File is found, check for raw.
+        //Set the content type and status code
+        res.writeHead(200, {'content-Type': 'application/json'});
+            if (!req.query.raw){
+              delete result.Entropy; 
+              res.end(JSON.stringify(result));
+            } else {
+              res.end(JSON.stringify(result));
+            }
+        }
+      });
       return;
     }
 
     //Check for SteveLib (libTemporal) request
     if (req.query.temporal === 'true') {
-      steveQrng.getEntropy(req, res, next);
+      steveQrng.getEntropy(req, res, function(result) {
+        if (result == "1") { //File not found
+            res.end(JSON.stringify("GID was not found"));     
+        } else {//File is found, check for raw.
+        //Set the content type and status code
+        res.writeHead(200, {'content-Type': 'application/json'});
+            if (!req.query.raw){
+              delete result.Entropy; 
+              res.end(JSON.stringify(result));
+            } else {
+              res.end(JSON.stringify(result));
+            }
+        }
+      });
       return;
     }
 

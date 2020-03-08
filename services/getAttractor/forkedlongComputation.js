@@ -14,9 +14,11 @@ module.exports = function(limit, callback){
   let filter = limit.filter;
   let handle = limit.handle;
   let pool = limit.pool;
+  let temporal = limit.temporal;
+  let gcp = limit.gcp;
   
   //Check if GID is found
-  qrng.getentropy(GID, pool, function(result) {
+  qrng.getentropy(GID, pool, temporal, gcp, function(result) {
        if (result == "1") {callback(null, "GID invalid");
        } else {
         let gid_valid = true;
