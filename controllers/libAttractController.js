@@ -233,6 +233,10 @@ exports.entropy = [
   check('gcp')
     .isBoolean()
     .optional(),
+
+  check('temporal')
+    .isBoolean()
+    .optional(),
     
   check('pool')
     .isBoolean()
