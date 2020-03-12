@@ -169,18 +169,18 @@ exports.getEntropy = function (appRequest, appResponse, callback) {
 
             //TODO: Send callback to function -> is really wacky solution, fix later
             extractEntropy(requestedSize, appResponse, todayBody, function(result) {
-                if (result == "1") {callback(null, "GID invalid");
+                if (result == "1") {
+                    callback(null, "GID invalid");
                 } else {
-                                fs.writeFile ('./services/entropy/gcp/'+result.Gid+".gcp", JSON.stringify(result), function(err) {
-                if (err){
-                    callback(JSON.stringify(1));
-                } else {
-                    console.log('complete');
-                    callback(result);
+                    fs.writeFile ('./services/entropy/gcp/'+result.Gid+".gcp", JSON.stringify(result), function(err) {
+                        if (err){
+                            callback(JSON.stringify(1));
+                        } else {
+                            console.log('complete');
+                            callback(result);
+                        }
+                    });
                 }
-            });
-                }
-      
         });
     });
 }
