@@ -10,7 +10,6 @@ function createResponseObject(entropy, size) {
 
     var entropyObject = {
         EntropySize: entropy.length,
-        Type: "Temporal",
         Timestamp: timestamp,
         Gid: gid,
         Entropy: entropy.toString('hex')
