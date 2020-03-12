@@ -31,8 +31,7 @@
             "<!(node -e \"require('nan').include\")"
         ],
         'libraries': [
-            "<(module_root_dir)/services/functionwrapper/cppsrc/libTemporal/libTemporal.a",
-            "<(module_root_dir)/services/functionwrapper/cppsrc/libTemporal/libgenerators.a"
+            "<(module_root_dir)/services/functionwrapper/cppsrc/libTemporal/TemporalLib.a",
         ],
         'dependencies': [
             "<!(node -p \"require('node-addon-api').gyp\")"
