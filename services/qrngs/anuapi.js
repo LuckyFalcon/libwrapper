@@ -304,6 +304,7 @@ exports.getpools = function gettoken(callback){
   let counter = 0;
     
     files.forEach(function(file) {
+        if (file == '.empty') return;
         var stats = fs.statSync('./services/entropy/pool/'+file);
         let obj = {
                   "pool": 0,
