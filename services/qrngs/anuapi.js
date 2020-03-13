@@ -16,7 +16,7 @@ exports.getsizeqrng  = function(size, callback){
   else if (size < 286) {callback(JSON.stringify(2)); return size}
   else if (size > 6000000) {callback(JSON.stringify(3)); return size}
   else {
-  console.log("Start Entropy Reqeust of size: " + size)
+  console.log("Start Entropy Request of size: " + size)
 
   //One size_url generates 2 hex characters for every number. 
   //1 size_url generates 2 hex characters. 
@@ -149,7 +149,7 @@ function anuSmall(size, length, url, callback){
         console.log(1 + " amounts of small queries done");
         console.log("Total entropy: " + results_anu.length);
         console.log("Added to pool: " + (results_anu.length - size));
-        console.log("End Entropy Reqeust of size: " + entropyObject.EntropySize)
+        console.log("End Entropy Request of size: " + entropyObject.EntropySize)
 
         fs.writeFile ('./services/entropy/'+entropyObject.Gid+".hex", JSON.stringify(entropyObject, null, 2), function(err) {
           if (err) throw err;
@@ -178,7 +178,7 @@ function callanuBig(size, url, big_query, callback){
         console.log(big_query + " amounts of big queries done");
         console.log("Total entropy: " + results_anu.length);
         console.log("Added to pool: " + (entropyObject.Entropy.length - size));
-        console.log("End Entropy Reqeust of size: " + entropyObject.EntropySize)
+        console.log("End Entropy Request of size: " + entropyObject.EntropySize)
         
         fs.writeFile ('./services/entropy/'+entropyObject.Gid+".hex", JSON.stringify(entropyObject, null, 2), function(err) {
           if (err) throw err;
@@ -217,7 +217,7 @@ function callanumulti(size, url, big_query, small_query_length, callback){
               console.log("Small query of " + small_query_length + " length done");
               console.log("Total entropy: " + results_anu.length);
               console.log("Added to pool: " + (results_anu.length - size));
-              console.log("End Entropy Reqeust of size: " + entropyObject.EntropySize)
+              console.log("End Entropy Request of size: " + entropyObject.EntropySize)
 
               fs.writeFile ('./services/entropy/'+entropyObject.Gid+".hex", JSON.stringify(entropyObject, null, 2), function(err) {
                 if (err) throw err;
@@ -336,7 +336,7 @@ exports.getpool = function(callback){
 
   let poolObject = {
       GidCurrentPool: gid,
-      TimestampReqeustPool: timestamp,
+      TimestampRequestPool: timestamp,
       PoolSize: length_pool,
       PoolEntropy: pool
   }

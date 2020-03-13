@@ -216,7 +216,7 @@ exports.attractors = [
 }
 ];
 
-//Search for entropy with GID or reqeust entropy based on size
+//Search for entropy with GID or request entropy based on size
 exports.entropy = [
   check('gid')
     .isHexadecimal()
