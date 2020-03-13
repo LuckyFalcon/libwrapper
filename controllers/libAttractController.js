@@ -144,6 +144,9 @@ exports.attractors = [
     return res.status(422).json({ errors: errors.array() })
   }
 
+  //Set timeout for this route
+  req.setTimeout(3 * 60 * 1000);
+
   try {
 
   //We fork our process
