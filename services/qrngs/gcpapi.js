@@ -101,8 +101,6 @@ function extractEntropy(requestedSize, appResponse, body, callback) {
                 }
             });
             callback(createEntropyObject(buffer.slice(0, offset).toString('hex'), requestedSize));
-
-           
         });
 }
 
@@ -146,6 +144,21 @@ exports.getEntropy = function (appRequest, appResponse, callback) {
     var yesterdayReqUrl = makeRequestUrl(yearFmt, monthFmt, dayFmt - 1, '00:00:00', '23:59:59');
     var todayReqUrl = makeRequestUrl(yearFmt, monthFmt, dayFmt, startTimeFmt, endTimeFmt);
 
+    var writeToFileCallback = function(result) {
+        if (result == "1") {
+            callback(null, "GID invalid");
+        } else {
+            fs.writeFile ('./services/entropy/gcp/'+result.Gid+".gcp", JSON.stringify(result), function(err) {
+                if (err){
+                    callback(JSON.stringify(1));
+                } else {
+                    console.log('complete');
+                    callback(result);
+                }
+            });
+        }
+    };
+
     request(todayReqUrl,
         function (gcpRequestError, gcpResponse, todayBody) {
             if (handleErrors(gcpRequestError, gcpResponse, appResponse)) {
@@ -162,25 +175,12 @@ exports.getEntropy = function (appRequest, appResponse, callback) {
                         }
 
                         console.log("yesterdayBody + todayBody");
-                        extractEntropy(requestedSize, appResponse, yesterdayBody + "\n" + todayBody);
+                        extractEntropy(requestedSize, appResponse, yesterdayBody + "\n" + todayBody, writeToFileCallback);
                     });
                 return;
             }
 
             //TODO: Send callback to function -> is really wacky solution, fix later
-            extractEntropy(requestedSize, appResponse, todayBody, function(result) {
-                if (result == "1") {
-                    callback(null, "GID invalid");
-                } else {
-                    fs.writeFile ('./services/entropy/gcp/'+result.Gid+".gcp", JSON.stringify(result), function(err) {
-                        if (err){
-                            callback(JSON.stringify(1));
-                        } else {
-                            console.log('complete');
-                            callback(result);
-                        }
-                    });
-                }
-        });
+            extractEntropy(requestedSize, appResponse, todayBody, writeToFileCallback);
     });
 }
