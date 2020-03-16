@@ -12,7 +12,7 @@ function createResponseObject(entropy, size) {
         EntropySize: entropy.length,
         Timestamp: timestamp,
         Gid: gid,
-        Entropy: entropy.toString('hex')
+        Entropy: entropy
     }
 
     return entropyObject;
@@ -24,7 +24,7 @@ exports.getEntropy = function (appRequest, appResponse, callback) {
 
   var buffer = addon.ohSteveOhSteveGiveMeRandomness(requestedSize);
 
-  var responseObject = createResponseObject(buffer.slice(0, requestedSize));
+  var responseObject = createResponseObject(buffer.toString('hex').slice(0, requestedSize));
 
   // Write file to disk by GID
   fs.writeFile ('./services/entropy/temporal/'+responseObject.Gid+".steve", JSON.stringify(responseObject), function(err) {
