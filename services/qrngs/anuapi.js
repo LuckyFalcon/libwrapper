@@ -255,7 +255,7 @@ exports.saveentropy = function gettoken(entropy, size, gid, timestamp, callback)
 //Used for getting entropy with GID
 exports.getentropy = function gettoken(gid, pool, temporal, gcp, callback){
   
-  switch("true"){
+  switch(true){
     case pool:
         fs.readFile ('./services/entropy/pool/'+gid+".pool", "utf8", function(err, data) {
           if (err){
