@@ -8,7 +8,7 @@ const gcpQrng   =  require(path.join(process.cwd(), "/services/qrngs/gcpapi.js")
 const steveQrng   =  require(path.join(process.cwd(), "/services/qrngs/temporalapi.js"));
 const checkAuth  = require(path.join(process.cwd(), "/services/authentication/check-auth.js"));
 const workerFarm = require('worker-farm')
-    , workers    = workerFarm({maxConcurrentWorkers : 3}, require.resolve(path.join(process.cwd(), "/services/getAttractor/forkedlongComputation.js")))
+    , workers    = workerFarm({maxConcurrentWorkers : 3, maxRetries: 1}, require.resolve(path.join(process.cwd(), "/services/getAttractor/forkedlongComputation.js")))
 
 //Used to get the current version of libAttract
 exports.list_version = (req, res) => {
