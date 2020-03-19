@@ -256,7 +256,7 @@ exports.saveentropy = function gettoken(entropy, size, gid, timestamp, callback)
 exports.getentropy = function gettoken(gid, pool, temporal, gcp, callback){
 
   //Check for GCP
-  if(gcp || gcp == "true"){
+  if(gcp == true || gcp == "true"){
         fs.readFile ('./services/entropy/gcp/'+gid+".gcp", "utf8", function(err, data) {
           if (err){
             callback(JSON.stringify(1));
@@ -267,7 +267,7 @@ exports.getentropy = function gettoken(gid, pool, temporal, gcp, callback){
   }
 
   //Check for Pool
-  else if(pool || pool == "true"){
+  else if(pool == true || pool == "true"){
         fs.readFile ('./services/entropy/pool/'+gid+".pool", "utf8", function(err, data) {
           if (err){
             callback(JSON.stringify(1));
@@ -278,7 +278,7 @@ exports.getentropy = function gettoken(gid, pool, temporal, gcp, callback){
   }
 
   //Check for Steve Temporal
-  else if(temporal || temporal == "true"){
+  else if(temporal == true || temporal == "true"){
         fs.readFile ('./services/entropy/temporal/'+gid+".steve", "utf8", function(err, data) {
           if (err){
             callback(JSON.stringify(1));
