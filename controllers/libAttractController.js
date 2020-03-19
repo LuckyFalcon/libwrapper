@@ -252,7 +252,7 @@ exports.entropy = [
   }
 
     //Check for GCP request
-    if (req.query.gcp === 'true') {
+    if (req.query.gcp === 'true' && req.query.size) {
       gcpQrng.getEntropy(req, res, function(result) {
         if (result == "1") { //File not found
             res.end(JSON.stringify("GID was not found"));     
@@ -271,7 +271,7 @@ exports.entropy = [
     }
 
     //Check for SteveLib (libTemporal) request
-    if (req.query.temporal === 'true') {
+    if (req.query.temporal === 'true' && req.query.size) {
       steveQrng.getEntropy(req, res, function(result) {
         if (result == "1") { //File not found
             res.end(JSON.stringify("GID was not found"));     

@@ -254,27 +254,9 @@ exports.saveentropy = function gettoken(entropy, size, gid, timestamp, callback)
 
 //Used for getting entropy with GID
 exports.getentropy = function gettoken(gid, pool, temporal, gcp, callback){
-  
-  switch(true){
-    case pool:
-        fs.readFile ('./services/entropy/pool/'+gid+".pool", "utf8", function(err, data) {
-          if (err){
-            callback(JSON.stringify(1));
-          } else {
-            callback(JSON.parse(data));
-          }
-        });
-        break;
-    case temporal:
-        fs.readFile ('./services/entropy/temporal/'+gid+".steve", "utf8", function(err, data) {
-          if (err){
-            callback(JSON.stringify(1));
-          } else {
-            callback(JSON.parse(data));
-          }
-        });
-        break;
-    case gcp:
+
+  //Check for GCP
+  if(gcp || gcp == "true"){
         fs.readFile ('./services/entropy/gcp/'+gid+".gcp", "utf8", function(err, data) {
           if (err){
             callback(JSON.stringify(1));
@@ -282,8 +264,33 @@ exports.getentropy = function gettoken(gid, pool, temporal, gcp, callback){
             callback(JSON.parse(data));
           }
         });
-        break;
-    default:
+  }
+
+  //Check for Pool
+  else if(pool || pool == "true"){
+        fs.readFile ('./services/entropy/pool/'+gid+".pool", "utf8", function(err, data) {
+          if (err){
+            callback(JSON.stringify(1));
+          } else {
+            callback(JSON.parse(data));
+          }
+        });
+  }
+
+  //Check for Steve Temporal
+  else if(temporal || temporal == "true"){
+        fs.readFile ('./services/entropy/temporal/'+gid+".steve", "utf8", function(err, data) {
+          if (err){
+            callback(JSON.stringify(1));
+          } else {
+            callback(JSON.parse(data));
+          }
+        });
+
+  }
+
+  //Check for ANU
+  else{
       fs.readFile ('./services/entropy/'+gid+".hex", "utf8", function(err, data) {
           if (err){
               callback(JSON.stringify(1));
@@ -292,6 +299,7 @@ exports.getentropy = function gettoken(gid, pool, temporal, gcp, callback){
           }
         });
   }
+
 
 } //End Function
 
