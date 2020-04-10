@@ -11,8 +11,7 @@
             "<!(node -e \"require('nan').include\")"
         ],
         'libraries': [
-            "<(module_root_dir)/services/functionwrapper/cppsrc/libAttract/libAttract.a.0.96.1",
-            "<(module_root_dir)/services/functionwrapper/cppsrc/libAttract/libAttract.so.0.96.1"
+            "<(module_root_dir)/services/functionwrapper/cppsrc/libAttract/libAttract.a.0.96.1"
         ],
         'dependencies': [
             "<!(node -p \"require('node-addon-api').gyp\")"
