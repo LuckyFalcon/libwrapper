@@ -1,6 +1,7 @@
 'use strict';
 const controller = require('../controllers/libAttractController');
 const reportController = require('../controllers/reportsController'); 
+const visualController = require('../controllers/visualController'); 
 
 module.exports = function(app) {
  
@@ -39,6 +40,10 @@ module.exports = function(app) {
   // POST for sending a trip report
   app.route('/reports/save')
     .post(reportController.saveReport);
+
+  // GET for viewing entropy
+  app.route('/visualizeentropy')
+    .get(visualController.visualizeEntropy);
 
   // GET for getting list of reports
   // TODO: Do we need this?
