@@ -1,5 +1,5 @@
 //ANUapi
-const https      = require('https')
+const http       = require('http')
 const path       = require('path');
 const fs         = require('fs');
 const addon      = require('../../build/Release/AttractFunctions'); 
@@ -65,7 +65,7 @@ exports.getsizeqrng  = function(size, callback){
   //We send big_query x amount of times. 
   if (big_query != 0 && small_query == 0){
     var length_url = 500;
-    var url = "https://qrng.anu.edu.au/API/jsonI.php?type=hex16&size="+size_url+"&length="+length_url;
+    var url = "http://qrng.anu.edu.au/API/jsonI.php?type=hex16&size="+size_url+"&length="+length_url;
   
 
     callanuBig(size, url, big_query, function(result) {
@@ -75,7 +75,7 @@ exports.getsizeqrng  = function(size, callback){
   //We only have small queries.
   } else if (small_query != 0 && big_query == 0) {
   var length = small_query;
-  var url = "https://qrng.anu.edu.au/API/jsonI.php?type=hex16&size="+size_url+"&length="+length;
+  var url = "http://qrng.anu.edu.au/API/jsonI.php?type=hex16&size="+size_url+"&length="+length;
 
 
     anuSmall(size, length, url, function(result) {
@@ -86,7 +86,7 @@ exports.getsizeqrng  = function(size, callback){
   } else if (big_query != 0 && small_query != 0){
   var length = small_query;
   var length_url = 500;
-  var url = "https://qrng.anu.edu.au/API/jsonI.php?type=hex16&size="+size_url+"&length="+length_url;
+  var url = "http://qrng.anu.edu.au/API/jsonI.php?type=hex16&size="+size_url+"&length="+length_url;
 
   callanumulti(size, url, big_query, length, function(result) {
        callback(result)
@@ -101,7 +101,7 @@ exports.getsizeqrng  = function(size, callback){
 //Used for calling ANU Quantum Random Numbers Server
 function anu(url, length, callback){
 
-  https.get(url, function(res){
+  http.get(url, function(res){
     var body = '';
 
       res.on('data', function(chunk){
@@ -206,7 +206,7 @@ function callanumulti(size, url, big_query, small_query_length, callback){
           results_anu += result; }
 
         if(timesRun == big_query){
-          var url = "https://qrng.anu.edu.au/API/jsonI.php?type=hex16&size="+size_url+"&length="+small_query_length;
+          var url = "http://qrng.anu.edu.au/API/jsonI.php?type=hex16&size="+size_url+"&length="+small_query_length;
           
           anu(url, small_query_length, function(result){
               results_anu += result;
