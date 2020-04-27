@@ -579,6 +579,56 @@ exports.sizes = [
 }
 ]
 
+//Do a psuedo run
+exports.getPoint = [
+  check('center[0]')
+    .isNumeric(),
+
+  check('center[1]')
+    .isNumeric(),
+
+  check('filtering')
+    .isFloat({ min: 0, max: 4 })
+    .optional(),
+
+ (req, res, next) => { /* the rest of the existing function */ 
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() })
+  }
+
+   //Set the content type and status code
+   res.writeHead(200, {'content-Type': 'application/json'});
+
+   var GID = 1;
+
+   var filter = parseFloat(4);
+
+   var radius = parseFloat(3000); 
+   var n = addon.getOptimizedDots(radius);
+   var seed = parseFloat(Math.floor(Math.random() * Math.floor(9999999999))); 
+
+   //Coordinates x for latitude and y for longitude
+   var x = parseFloat(req.query.center[0]);
+   var y = parseFloat(req.query.center[1]);
+
+   //Get Handle
+   var handle = addon.getHandle();
+
+   //Run psuedoInstance and get findAttractors
+   var psuedoInstance = addon.initWithPseudo(handle, n, seed);
+
+   //Find and Calculate attractors
+   addon.CalculateResultsAsync(psuedoInstance, radius, x, y, GID, filter, function(results) {        
+          if(results.length == 0){
+              res.end(JSON.stringify(results));
+          }
+   });
+
+}
+];
+
+
 //Make attractors
 exports.makeattractor = function(GID, attractors, gid_valid, centervalid, calc_time, callback) {
   

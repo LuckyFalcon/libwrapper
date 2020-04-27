@@ -1,54 +1,82 @@
 'use strict';
+const express = require('express');
 const controller = require('../controllers/libAttractController');
+const InstructionsController = require('../controllers/InstructionsController');
 const reportController = require('../controllers/reportsController'); 
 const visualController = require('../controllers/visualController'); 
+const userController = require('../controllers/user-controller');
+const jwt = require('../helpers/jwt');
+const router = express.Router();
 
-module.exports = function(app) {
- 
-  //GET route for version
-  app.route('/Version')
-  	.get(controller.list_version);
-  
-  //GET route for sizes
-  app.route('/sizes')
-    .get(controller.sizes);
-
-  //GET for the running the pseudo instance
-  app.route('/pseudo')
-    .get(controller.psuedo);
-
-  //POST for the setting own entropy
-  app.route('/setentropy')
-    .post(controller.setentropy);
-
-  //GET for getting entropy
-  app.route('/entropy')
-    .get(controller.entropy);
-
-  //GET for getting pool
-  app.route('/pool')
-    .get(controller.getPool);
-
-  //GET for getting pools
-  app.route('/getpools')
-    .get(controller.getpools);
-
-  //GET for getting attractors
-  app.route('/attractors')
-    .get(controller.attractors);
-
-  // POST for sending a trip report
-  app.route('/reports/save')
-    .post(reportController.saveReport);
-
-  // GET for viewing entropy
-  app.route('/visualizeentropy')
-    .get(visualController.visualizeEntropy);
-
-  // GET for getting list of reports
-  // TODO: Do we need this?
-  //app.route('/reports/list')
-    //.get(reportController.getReports)
+//const roles = require('../helpers/roles');
+//Roles -----> TODO: This should be moved externally and not be put here. It doesn't seem to pick it up from export!
+const roles = {
+  User: "user",
+  Admin: "admin"
 };
 
-  
+/* Authentication Routes  */
+
+//POST route for user authentication
+router.post('/authenticate', userController.authenticate);
+
+//POST route for user registration
+router.post('/register', userController.register);
+
+//GET route for getting all users registered
+router.get('/allusers', jwt(roles.Admin), userController.getAll);
+
+/* Attractor Generation Routes  */
+
+//GET route for version
+router.get('/version', jwt(roles.Admin), controller.list_version);
+
+//GET route for sizes
+router.get('/sizes', jwt([roles.User, roles.Admin]), controller.sizes);
+
+//GET for the running the pseudo instance
+router.get('/pseudo', jwt([roles.User, roles.Admin]), controller.psuedo);
+
+//POST for the setting own entropy
+router.get('/setentropy', jwt([roles.User, roles.Admin]), controller.setentropy);
+
+//GET for getting entropy
+router.get('/entropy', jwt([roles.User, roles.Admin]), controller.entropy);
+
+//GET for getting pool
+router.get('/pool', jwt([roles.User, roles.Admin]), controller.getPool);
+
+//GET for getting pools
+router.get('/getpools', jwt([roles.User, roles.Admin]), controller.getpools);
+
+//GET for getting attractors
+router.get('/attractors', jwt([roles.User, roles.Admin]), controller.attractors);
+
+//GET for getting random point
+router.get('/getpoint', controller.getPoint);
+
+// POST for sending a trip report
+router.post('/reports/save', jwt([roles.User, roles.Admin]), reportController.saveReport);
+
+// GET for viewing entropy
+router.get('/visualizeentropy', jwt([roles.User, roles.Admin]), visualController.visualizeEntropy);
+
+
+/* Route Generation Routes  */
+
+//GET for getting instructions from Mapbox
+router.get('/directions/instructions/:option/:from1,:from2;:to1,:to2', jwt(roles.Admin), InstructionsController.getRouteInstructions);
+
+//GET for getting instructions route locally (WIP)
+router.get('/local/directions/instructions/:from1,:from2;:to1,:to2', jwt(roles.Admin), InstructionsController.getRouteInstructionsLocal);
+
+//GET for getting attractors navigation in mapbox locally (WIP)
+router.get('/directions/v5/mapbox/:profile/:from1,:from2;:to1,:to2', jwt(roles.Admin), InstructionsController.getRouteNavigationsLocal);
+
+
+// GET for getting list of reports
+// TODO: Do we need this?
+//app.route('/reports/list')
+//.get(reportController.getReports)
+
+module.exports = router;
