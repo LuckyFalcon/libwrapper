@@ -2,7 +2,8 @@
 const { check, validationResult } = require('express-validator');
 const path       = require('path');
 const crypto     = require('crypto');
-const addon      = require(path.join(process.cwd(), '/build/Release/AttractFunctions'));
+const request = require('request');
+const addon      = require(path.join(process.cwd(), '/build/Release/libAttractFunctions'));
 const anuQrng    = require(path.join(process.cwd(), "/services/qrngs/anuapi.js"));
 const gcpQrng   =  require(path.join(process.cwd(), "/services/qrngs/gcpapi.js"));
 const steveQrng   =  require(path.join(process.cwd(), "/services/qrngs/temporalapi.js"));
@@ -201,19 +202,41 @@ exports.attractors = [
       'gcp': gcp
   }
 
-  //Send object to worker
-  workers(myObj, function (err, output) {
-    if (err){
-      res.json({ error: err || err.toString() });
-    }
+    //Check if GID is found --> Call Azure function
+  anuQrng.getentropy(GID, pool, temporal, gcp, function(result) {
+       if (result == "1") {
+          res.writeHead(200, {'content-Type': 'application/json'});
+          res.end(JSON.stringify("GID invalid"));
+       } else {        
+       var options = {
+          url: 'https://newtonlib.azurewebsites.net/api/attractors?radius='+myObj.radius+'&latitude='+myObj.x+'&longitude='+myObj.y+'&gid=3333',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+         
+          },
+          body: new Buffer(result.Entropy, 'hex')
+        };
 
-    //When the worker sends a message we send the result to the client
-    res.json(output);
-  })
+        request.post(options, function(err, response, body) {
+          if (err) {
+            //Handle error
+            console.log(err)
+            return;
+          }
+          if (response) {
+            console.log('contents received');
+            res.writeHead(200, {'content-Type': 'application/json'});
+            res.end(response.body);
+          }
+        });
+      }
+        
+  }); 
   
   } catch (err) {
 
-    console.log('Err');
+    console.log('Err' + err);
    
   }
 }
@@ -374,7 +397,6 @@ exports.psuedo = [
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() })
   }
-
   if (req.query.n && req.query.center[0] && req.query.center[1] && req.query.radius && !req.query.seed && !req.query.filtering){
    //Set the content type and status code
    res.writeHead(200, {'content-Type': 'application/json'});

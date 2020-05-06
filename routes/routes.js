@@ -32,34 +32,52 @@ router.get('/allusers', jwt(roles.Admin), userController.getAll);
 router.get('/version', jwt(roles.Admin), controller.list_version);
 
 //GET route for sizes
-router.get('/sizes', jwt([roles.User, roles.Admin]), controller.sizes);
+router.get('/sizes', 
+	//jwt([roles.User, roles.Admin]),  --> Uncomment to enable Authentication
+	controller.sizes);
 
 //GET for the running the pseudo instance
-router.get('/pseudo', jwt([roles.User, roles.Admin]), controller.psuedo);
+router.get('/pseudo', 
+	//jwt([roles.User, roles.Admin]),  --> Uncomment to enable Authentication
+	controller.psuedo);
 
 //POST for the setting own entropy
-router.get('/setentropy', jwt([roles.User, roles.Admin]), controller.setentropy);
+router.get('/setentropy', 
+	//jwt([roles.User, roles.Admin]),  --> Uncomment to enable Authentication 
+	controller.setentropy);
 
 //GET for getting entropy
-router.get('/entropy', jwt([roles.User, roles.Admin]), controller.entropy);
+router.get('/entropy', 
+	//jwt([roles.User, roles.Admin]),  --> Uncomment to enable Authentication
+	controller.entropy);
 
 //GET for getting pool
-router.get('/pool', jwt([roles.User, roles.Admin]), controller.getPool);
+router.get('/pool', 
+	//jwt([roles.User, roles.Admin]),  --> Uncomment to enable Authentication
+	controller.getPool);
 
 //GET for getting pools
-router.get('/getpools', jwt([roles.User, roles.Admin]), controller.getpools);
+router.get('/getpools', 
+	//jwt([roles.User, roles.Admin]),  --> Uncomment to enable Authentication
+	controller.getpools);
 
 //GET for getting attractors
-router.get('/attractors', jwt([roles.User, roles.Admin]), controller.attractors);
+router.get('/attractors', 
+	//jwt([roles.User, roles.Admin]), --> Uncomment to enable Authentication
+	controller.attractors);
 
 //GET for getting random point
 router.get('/getpoint', controller.getPoint);
 
 // POST for sending a trip report
-router.post('/reports/save', jwt([roles.User, roles.Admin]), reportController.saveReport);
+router.post('/reports/save', 
+	//jwt([roles.User, roles.Admin]),  --> Uncomment to enable Authentication
+	reportController.saveReport);
 
 // GET for viewing entropy
-router.get('/visualizeentropy', jwt([roles.User, roles.Admin]), visualController.visualizeEntropy);
+router.get('/visualizeentropy', 
+	//jwt([roles.User, roles.Admin]),  --> Uncomment to enable Authentication
+	visualController.visualizeEntropy);
 
 
 /* Route Generation Routes  */
