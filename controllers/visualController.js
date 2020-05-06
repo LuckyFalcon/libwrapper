@@ -10,7 +10,7 @@ exports.visualizeEntropy = [
     var cmd = "mkdir -p public/" + req.query.gid + "/hex_in; cd public/" + req.query.gid + "; find ../../services/entropy | grep " + req.query.gid + " | xargs cat | jq --raw-output .Entropy > hex_in/entropy.hex; temporal view hex_in/ .; rm hex_in/entropy.hex; rmdir hex_in;";
     console.log("cmd: " + cmd);
     runCmd(cmd);
-    res.redirect("/" + req.query.gid + "/external_scoring.html");
+    res.redirect("/" + req.query.gid + "/entropy.hex_view.html");
   }
 ];
 
