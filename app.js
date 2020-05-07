@@ -26,6 +26,9 @@ app.use(function(req, res, next) {
 
 });
 
+// Set public folder for server static content (like entropy visualization images outputted from SteveLib)
+app.use(express.static('public'))
+
 //Set Routes
 app.use('/', router);
 
