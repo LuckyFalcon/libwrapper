@@ -3,7 +3,7 @@ var express = require('express'),
   	port = process.env.PORT || 3000;
   	bodyParser = require('body-parser');
   	errorHandler = require('./helpers/errorHandler');
-  	router = require('./routes/Routes');
+  	router = require('./routes/routes');
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(bodyParser.json());
