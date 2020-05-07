@@ -397,10 +397,15 @@ exports.psuedo = [
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() })
   }
+  
+  //Set timeout for this route
+  req.setTimeout(3 * 60 * 1000);
+  
   if (req.query.n && req.query.center[0] && req.query.center[1] && req.query.radius && !req.query.seed && !req.query.filtering){
+	
    //Set the content type and status code
    res.writeHead(200, {'content-Type': 'application/json'});
-
+	
    var GID = 1;
 
    var filter = parseFloat(req.query.filtering); 
