@@ -42,7 +42,7 @@ router.get('/pseudo',
 	controller.psuedo);
 
 //POST for the setting own entropy
-router.get('/setentropy', 
+router.post('/setentropy', 
 	//jwt([roles.User, roles.Admin]),  --> Uncomment to enable Authentication 
 	controller.setentropy);
 
