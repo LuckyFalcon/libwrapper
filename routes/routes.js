@@ -14,7 +14,13 @@ const roles = {
   User: "user",
   Admin: "admin"
 };
-
+	
+	
+//GET for getting random point #TODO!
+router.get('/getpointattractor', 
+	//jwt([roles.User, roles.Admin]), --> Uncomment to enable Authentication
+	controller.getPointAttractor);	
+	
 /* Authentication Routes  */
 
 //POST route for user authentication

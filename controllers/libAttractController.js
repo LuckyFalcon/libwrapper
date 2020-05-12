@@ -716,3 +716,85 @@ exports.makeattractor = function(GID, attractors, gid_valid, centervalid, calc_t
 }
 
 //End Controller
+
+
+
+//Do a psuedo run
+exports.getPointAttractor = [
+check('radius')
+.isNumeric(),
+
+check('center[0]')
+.isNumeric(),
+
+check('center[1]')
+.isNumeric(),
+
+check('filtering')
+.isFloat({ min: 0, max: 4 })
+.optional(),
+
+(req, res, next) => { /* the rest of the existing function */ 
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() })
+  }
+
+    //Parse parameters given in request
+    var radius = parseFloat(req.query.radius);
+
+        var x = parseFloat(req.query.center[0]);
+    var y = parseFloat(req.query.center[1]); 
+
+    var n = addon.getOptimizedDots(radius);
+    var spot = addon.getSpotSize(addon.getOptimizedDots(radius), radius);
+
+    var th = addon.getOptimizedDots(radius); 
+    var hexSize = addon.requiredEnthropyHex(th);
+
+    var entropy = anuQrng.getsizeqrng(hexSize, function(result) {
+      if (result == "1") {res.writeHead(400, {'content-Type': 'application/json'}); res.end(JSON.stringify("Size Error, size has to be set to 286 minimum"))}
+      else if (result == "2") {res.writeHead(400, {'content-Type': 'application/json'}); res.end(JSON.stringify("Size Error, Minimum size can be set to 286"))}
+      else if (result == "3") {res.writeHead(400, {'content-Type': 'application/json'}); res.end(JSON.stringify("Size Error, Maximum size can be set to 6000000"))}
+      else if (req.query.raw == 'false'){
+
+
+      //Set the content type and status code
+      res.writeHead(200, {'content-Type': 'application/json'});
+      delete result.Entropy; 
+                        //Check if GID is found --> Call Azure function
+      anuQrng.getentropy(result.Gid, false, false, false, function(result) {
+        if (result == "1") {
+          callback("GID invalid");
+        } else {        
+          var options = {
+            url: 'https://newtonlib.azurewebsites.net/api/attractors?radius='+radius+'&latitude='+x+'&longitude='+y+'&gid=3333',
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/octet-stream',
+            },
+            body: new Buffer(result.Entropy, 'hex')
+            };
+
+            request.post(options, function(err, response, body) {
+              if (err) {
+               //Handle error
+              res.end((err));
+              return;
+              }
+              if (response) {
+                console.log('contents received');
+                res.end((response.body));
+              }
+            });
+          }
+
+      })
+      } else {
+        res.writeHead(200, {'content-Type': 'application/json'});
+        res.end(JSON.stringify(result));
+      }
+      })
+
+  }
+  ];
